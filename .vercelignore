@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env*
+.demo-prep
+work
+output
+.codex
+.claude
+test-results
+test-output
+playwright-report

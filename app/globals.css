@@ -1,0 +1,752 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+html {
+  zoom: 1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-display-serif);
+  --font-mono: var(--font-space-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Cinemateca-style product tokens */
+  --t-bg: #000;
+  --t-bg-elevated: #111;
+  --t-bg-card: rgba(255, 255, 255, 0.03);
+  --t-bg-card-hover: rgba(255, 255, 255, 0.05);
+  --t-bg-subtle: rgba(255, 255, 255, 0.06);
+  --t-bg-active: rgba(255, 255, 255, 0.1);
+  --t-bg-overlay: rgba(0, 0, 0, 0.6);
+  --t-bg-input: #1c1c1e;
+  --t-text: #fff;
+  --t-text-2: rgba(255, 255, 255, 0.72);
+  --t-text-3: rgba(255, 255, 255, 0.65);
+  --t-text-4: rgba(255, 255, 255, 0.58);
+  --t-text-5: rgba(255, 255, 255, 0.5);
+  --t-text-6: rgba(255, 255, 255, 0.55);
+  --t-border: rgba(255, 255, 255, 0.08);
+  --t-border-medium: rgba(255, 255, 255, 0.12);
+  --t-border-strong: rgba(255, 255, 255, 0.18);
+  --t-accent: #00e054;
+  --t-accent-2: #40bcf4;
+  --t-radius-xs: 2px;
+  --t-radius-sm: 4px;
+  --t-radius-md: 6px;
+  --t-radius-base: 8px;
+  --t-radius-lg: 10px;
+  --t-radius-xl: 12px;
+  --t-radius-pill: 999px;
+  --t-space-1: 2px;
+  --t-space-2: 4px;
+  --t-space-3: 6px;
+  --t-space-4: 8px;
+  --t-space-5: 10px;
+  --t-space-6: 12px;
+  --t-space-7: 14px;
+  --t-space-8: 16px;
+  --t-space-9: 20px;
+  --t-space-10: 24px;
+  --t-space-11: 28px;
+  --t-space-12: 32px;
+  --t-space-14: 40px;
+  --t-space-16: 48px;
+  --t-font-scale: 1.25;
+  --t-font-2xs: calc(9px * var(--t-font-scale));
+  --t-font-xs: calc(10px * var(--t-font-scale));
+  --t-font-sm: calc(11px * var(--t-font-scale));
+  --t-font-base: calc(12px * var(--t-font-scale));
+  --t-font-md: calc(13px * var(--t-font-scale));
+  --t-font-lg: calc(14px * var(--t-font-scale));
+  --t-font-xl: calc(15px * var(--t-font-scale));
+  --t-font-2xl: clamp(1rem, 0.8rem + 1vw, calc(16px * var(--t-font-scale)));
+  --t-font-3xl: clamp(1.25rem, 1rem + 1.5vw, calc(22px * var(--t-font-scale)));
+  --t-font-4xl: clamp(1.5rem, 1.125rem + 2.25vw, calc(28px * var(--t-font-scale)));
+  --t-font-5xl: clamp(1.875rem, 1.25rem + 3.5vw, calc(36px * var(--t-font-scale)));
+
+  /* shadcn/Tailwind compatibility */
+  --background: var(--t-bg);
+  --foreground: var(--t-text);
+  --card: var(--t-bg-card);
+  --card-foreground: var(--t-text);
+  --popover: var(--t-bg-elevated);
+  --popover-foreground: var(--t-text);
+  --primary: var(--t-text);
+  --primary-foreground: var(--t-bg);
+  --secondary: var(--t-bg-subtle);
+  --secondary-foreground: var(--t-text);
+  --muted: var(--t-bg-subtle);
+  --muted-foreground: var(--t-text-5);
+  --accent: var(--t-bg-active);
+  --accent-foreground: var(--t-text);
+  --destructive: oklch(0.65 0.2 25);
+  --border: var(--t-border);
+  --input: var(--t-border-strong);
+  --ring: var(--t-text-4);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: var(--t-bg);
+  --sidebar-foreground: var(--t-text);
+  --sidebar-primary: var(--t-text);
+  --sidebar-primary-foreground: var(--t-bg);
+  --sidebar-accent: var(--t-bg-active);
+  --sidebar-accent-foreground: var(--t-text);
+  --sidebar-border: var(--t-border);
+  --sidebar-ring: var(--t-text-4);
+}
+
+.dark {
+  --background: var(--t-bg);
+  --foreground: var(--t-text);
+  --card: var(--t-bg-card);
+  --card-foreground: var(--t-text);
+  --popover: var(--t-bg-elevated);
+  --popover-foreground: var(--t-text);
+  --primary: var(--t-text);
+  --primary-foreground: var(--t-bg);
+  --secondary: var(--t-bg-subtle);
+  --secondary-foreground: var(--t-text);
+  --muted: var(--t-bg-subtle);
+  --muted-foreground: var(--t-text-5);
+  --accent: var(--t-bg-active);
+  --accent-foreground: var(--t-text);
+  --destructive: oklch(0.65 0.2 25);
+  --border: var(--t-border);
+  --input: var(--t-border-strong);
+  --ring: var(--t-text-4);
+  --chart-1: oklch(0.65 0.2 280);
+  --chart-2: oklch(0.70 0.17 162);
+  --chart-3: oklch(0.77 0.19 70);
+  --chart-4: oklch(0.63 0.26 304);
+  --chart-5: oklch(0.65 0.25 16);
+  --sidebar: var(--t-bg);
+  --sidebar-foreground: var(--t-text);
+  --sidebar-primary: var(--t-text);
+  --sidebar-primary-foreground: var(--t-bg);
+  --sidebar-accent: var(--t-bg-active);
+  --sidebar-accent-foreground: var(--t-text);
+  --sidebar-border: var(--t-border);
+  --sidebar-ring: var(--t-text-4);
+}
+
+/* ---------------------------------------------------------------------------
+   Paper-form theme — Scriptlook's unified production-form surface across the
+   landing page, app workflow, interactive report, demo decks, and share view.
+   Fonts flip too: Courier Prime body, Oswald display.
+--------------------------------------------------------------------------- */
+.paper {
+  color-scheme: light;
+  color: var(--paper-ink);
+  /* Re-root inherited text: html sets DM Sans once, so descendants need the
+     typewriter voice declared here, not just via the var flip below. */
+  font-family: var(--font-courier-prime), "Courier New", monospace;
+  /* Most paper text uses literal px classes, so a uniform zoom is the one
+     lever that scales the whole sheet ~10% (type, rules, art) together. */
+  zoom: 1.1;
+
+  /* Form palette */
+  --paper-desk: #e6e2d8;
+  --paper-sheet: #fdfbf5;
+  --paper-ink: #111111;
+  --paper-soft: #555555;
+  --paper-faint: rgba(17, 17, 17, 0.45);
+  --paper-rule: #111111;
+  --paper-rule-soft: #ccc7b8;
+  --paper-highlight: #ffe34d;
+
+  /* Font flip: utilities compile to these source vars, so overriding them in
+     scope re-voices font-sans / font-mono / font-display without touching
+     any component code. */
+  --font-dm-sans: var(--font-courier-prime);
+  --font-space-mono: var(--font-courier-prime);
+  --font-display-serif: var(--font-oswald);
+
+  /* Token flip for everything built on --t-* / shadcn vars */
+  --t-bg: var(--paper-desk);
+  --t-bg-elevated: var(--paper-sheet);
+  --t-bg-card: rgba(255, 255, 255, 0.6);
+  --t-bg-card-hover: rgba(255, 227, 77, 0.18);
+  --t-bg-subtle: rgba(17, 17, 17, 0.05);
+  --t-bg-active: rgba(17, 17, 17, 0.09);
+  --t-bg-overlay: rgba(230, 226, 216, 0.8);
+  --t-bg-input: #ffffff;
+  --t-text: var(--paper-ink);
+  --t-text-2: rgba(17, 17, 17, 0.78);
+  --t-text-3: rgba(17, 17, 17, 0.7);
+  --t-text-4: rgba(17, 17, 17, 0.6);
+  --t-text-5: rgba(17, 17, 17, 0.52);
+  --t-text-6: rgba(17, 17, 17, 0.56);
+  --t-border: rgba(17, 17, 17, 0.35);
+  --t-border-medium: rgba(17, 17, 17, 0.55);
+  --t-border-strong: var(--paper-ink);
+  --radius: 0rem;
+  --background: var(--t-bg);
+  --foreground: var(--t-text);
+  --card: var(--t-bg-card);
+  --card-foreground: var(--t-text);
+  --popover: var(--t-bg-elevated);
+  --popover-foreground: var(--t-text);
+  --primary: var(--t-text);
+  --primary-foreground: var(--paper-sheet);
+  --secondary: var(--t-bg-subtle);
+  --secondary-foreground: var(--t-text);
+  --muted: var(--t-bg-subtle);
+  --muted-foreground: var(--t-text-5);
+  --accent: var(--t-bg-active);
+  --accent-foreground: var(--t-text);
+  --border: var(--t-border);
+  --input: var(--t-border-strong);
+  --ring: var(--t-text-4);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer utilities {
+  /* The physical sheet: hard 2px ink border + offset block shadow */
+  .paper .form-sheet {
+    background: var(--paper-sheet);
+    border: 2px solid var(--paper-rule);
+    box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.18);
+  }
+  /* Square everything inside paper scope — the form has no soft corners.
+     Components shared with the dark app keep their radii outside `.paper`. */
+  .paper .form-sheet *,
+  .paper .form-sheet,
+  .paper .shareable-page * {
+    border-radius: 0 !important;
+  }
+  /* Interactive report: one physical dossier, with the index and report body
+     separated by ink rules instead of independent floating cards. */
+  .paper .report-surface {
+    isolation: isolate;
+  }
+  .paper .report-surface ::selection {
+    background: var(--paper-highlight);
+    color: var(--paper-ink);
+  }
+  /* Rotated rubber stamp */
+  .paper .form-stamp {
+    border: 3px solid var(--paper-rule);
+    padding: 6px 14px;
+    transform: rotate(4deg);
+    font-family: var(--font-oswald);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--paper-ink);
+  }
+  /* Yellow highlighter swipe for key phrases */
+  .paper .mark-hl {
+    background: var(--paper-highlight);
+    padding: 1px 4px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  /* Oswald section head, e.g. "EXHIBIT B — SAMPLE DECKS ON FILE" */
+  .paper .form-sec-head {
+    font-family: var(--font-oswald);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  /* Dashed drop zone with a faint highlighter tint */
+  .paper .form-dropzone {
+    border: 2px dashed var(--paper-rule);
+    background: rgba(255, 227, 77, 0.12);
+  }
+  .paper .form-dropzone:hover {
+    background: rgba(255, 227, 77, 0.35);
+  }
+  /* Seam between report sections: a small centered ornament rather than a
+     full-width line, so it doesn't compete with each section's own solid
+     head rule. Marks the break without a heavy double-rule look. */
+  .paper .shareable-page > section + section {
+    position: relative;
+    padding-top: 3rem;
+  }
+  .paper .shareable-page > section + section::before {
+    content: "·  ·  ·";
+    position: absolute;
+    top: 1.15rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-courier-prime), monospace;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: rgba(17, 17, 17, 0.4);
+    line-height: 1;
+  }
+  /* Taped-on polaroid for poster art */
+  .paper .form-polaroid {
+    position: relative;
+    border: 1px solid var(--paper-rule);
+    background: #ffffff;
+    padding: 7px;
+    transform: rotate(-1.5deg);
+    box-shadow: 3px 4px 0 rgba(17, 17, 17, 0.15);
+  }
+  .paper .form-polaroid::before {
+    content: "";
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%) rotate(2deg);
+    width: 64px;
+    height: 20px;
+    background: rgba(255, 227, 77, 0.65);
+    border: 1px dashed rgba(17, 17, 17, 0.25);
+  }
+
+  .paper.paper-motion-enabled .paper-motion-reveal {
+    opacity: 0;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-sheet {
+    transform-origin: 50% 12%;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-sheet.is-in-view {
+    animation: paper-sheet-place 640ms cubic-bezier(0.16, 0.9, 0.22, 1) both;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-sheet.is-in-view:nth-of-type(2) {
+    animation-delay: 90ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-sheet.is-in-view:nth-of-type(3) {
+    animation-delay: 160ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-stamp {
+    transform-origin: 50% 50%;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-stamp.is-in-view {
+    animation: paper-stamp-hit 620ms cubic-bezier(0.18, 1.35, 0.32, 1) 180ms both;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-row.is-in-view {
+    animation: paper-row-file 460ms ease-out both;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-row.is-in-view:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-row.is-in-view:nth-child(3) {
+    animation-delay: 140ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-row.is-in-view:nth-child(4) {
+    animation-delay: 210ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-card.is-in-view {
+    animation: paper-row-file 520ms ease-out both;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-card.is-in-view:nth-child(3n + 2) {
+    animation-delay: 90ms;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-card.is-in-view:nth-child(3n + 3) {
+    animation-delay: 180ms;
+  }
+
+  .paper .paper-motion-button {
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease,
+      opacity 150ms ease,
+      scale 150ms cubic-bezier(0.2, 0, 0, 1),
+      transform 150ms ease;
+  }
+
+  .paper .paper-motion-button:hover {
+    background: var(--paper-highlight);
+    box-shadow: 3px 3px 0 rgba(17, 17, 17, 0.2);
+    color: var(--paper-ink);
+    transform: translate(-1px, -1px);
+  }
+
+  .paper .paper-motion-button:active {
+    box-shadow: 1px 1px 0 rgba(17, 17, 17, 0.16);
+    scale: 0.96;
+    transform: translate(0, 0);
+  }
+
+  .paper .paper-motion-card {
+    transition:
+      background-color 150ms ease,
+      transform 180ms ease;
+  }
+
+  .paper .paper-motion-card .form-polaroid {
+    transition:
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .paper .paper-motion-card:hover .form-polaroid,
+  .paper .paper-motion-card:focus-visible .form-polaroid {
+    box-shadow: 5px 7px 0 rgba(17, 17, 17, 0.18);
+    transform: rotate(-0.4deg) translateY(-3px);
+  }
+}
+
+@keyframes paper-sheet-place {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(8px) rotate(-0.25deg);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes paper-stamp-hit {
+  0% {
+    opacity: 0;
+    transform: rotate(4deg) scale(1.18);
+  }
+  62% {
+    opacity: 1;
+    transform: rotate(4deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(4deg) scale(1);
+  }
+}
+
+@keyframes paper-row-file {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper.paper-motion-enabled .paper-motion-reveal {
+    opacity: 1;
+  }
+
+  .paper.paper-motion-enabled .paper-motion-sheet.is-in-view,
+  .paper.paper-motion-enabled .paper-motion-stamp.is-in-view,
+  .paper.paper-motion-enabled .paper-motion-row.is-in-view,
+  .paper.paper-motion-enabled .paper-motion-card.is-in-view {
+    animation: none;
+  }
+
+  .paper .paper-motion-button,
+  .paper .paper-motion-card,
+  .paper .paper-motion-card .form-polaroid {
+    transition: none;
+  }
+
+  .paper .paper-motion-button:hover,
+  .paper .paper-motion-button:active,
+  .paper .paper-motion-card:hover .form-polaroid,
+  .paper .paper-motion-card:focus-visible .form-polaroid {
+    box-shadow: none;
+    scale: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .paper {
+    zoom: 1;
+  }
+
+  .paper .form-sheet {
+    box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.14);
+  }
+
+  .paper .shareable-page > section + section {
+    padding-top: 2.25rem;
+  }
+
+  .paper .shareable-page > section + section::before {
+    top: 0.85rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .paper .form-sheet {
+    box-shadow: 3px 3px 0 rgba(17, 17, 17, 0.12);
+  }
+
+  .paper .form-stamp {
+    padding: 5px 10px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .paper .form-polaroid {
+    padding: 6px;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+  /* Cinemateca-aligned type rhythm: quiet UI sans, serif for display moments. */
+  h1 {
+    letter-spacing: 0;
+  }
+  h2 {
+    letter-spacing: 0;
+  }
+  h3 {
+    letter-spacing: 0;
+  }
+  p {
+    letter-spacing: 0;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Legacy class names now map to Cinemateca-style restrained chrome. */
+@layer utilities {
+  .shadow-paper {
+    box-shadow:
+      inset 0 0 0 1px var(--t-border),
+      0 12px 32px -24px rgba(0, 0, 0, 0.8);
+  }
+  .shadow-paper-hover {
+    box-shadow:
+      inset 0 0 0 1px var(--t-border-strong),
+      0 16px 40px -28px rgba(0, 0, 0, 0.9);
+  }
+  .shadow-pill {
+    box-shadow:
+      inset 0 0 0 1px var(--t-border);
+  }
+  .shadow-cascade {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 20px 40px -12px rgba(0, 0, 0, 0.7),
+      0 60px 120px -20px rgba(0, 0, 0, 0.5),
+      0 100px 200px -40px rgba(0, 0, 0, 0.3);
+  }
+  .report-motion-card {
+    transition-duration: 180ms;
+    transition-property: background-color, border-color, box-shadow, opacity, transform;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  @media (hover: hover) {
+    .report-motion-card:hover {
+      transform: translateY(-1px);
+    }
+  }
+  .report-motion-content {
+    animation: report-content-in 180ms cubic-bezier(0.2, 0, 0, 1) both;
+    transform-origin: top;
+    will-change: opacity, transform;
+  }
+  .report-motion-status {
+    animation: report-status-in 160ms cubic-bezier(0.2, 0, 0, 1) both;
+    will-change: opacity, transform;
+  }
+  .report-expand-icon {
+    transition: transform 180ms cubic-bezier(0.2, 0, 0, 1), color 160ms ease;
+  }
+  .report-loading-surface {
+    position: relative;
+    overflow: hidden;
+  }
+  .report-loading-surface::after {
+    animation: report-loading-sweep 1.4s ease-in-out infinite;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 100%
+    );
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: translateX(-100%);
+  }
+  .report-loading-dot {
+    animation: report-loading-dot 1.1s ease-in-out infinite;
+  }
+  /* Grid pattern background for hero mockups */
+  .bg-grid-pattern {
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  :root:not(.dark) .bg-grid-pattern {
+    background-image: radial-gradient(circle, rgba(23, 23, 23, 0.05) 1px, transparent 1px);
+  }
+}
+
+/* Print: the paper theme flattens to plain document pages — no desk, no
+   sheet border/shadow (they draw clipped lines on every page edge), no zoom,
+   no polaroid tilt. Interactive chrome opts out via Tailwind print:hidden. */
+@media print {
+  .paper {
+    zoom: 1;
+  }
+  .paper .form-sheet {
+    border: 0;
+    box-shadow: none;
+  }
+  .paper .form-polaroid {
+    transform: none;
+    box-shadow: none;
+  }
+  .paper .form-polaroid::before {
+    display: none;
+  }
+}
+
+@keyframes report-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes report-status-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes report-loading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes report-loading-dot {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .report-motion-card:hover {
+    transform: none;
+  }
+
+  .report-motion-content,
+  .report-motion-status,
+  .report-loading-dot,
+  .report-loading-surface::after {
+    animation: none !important;
+    transform: none !important;
+  }
+}
