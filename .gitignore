@@ -42,10 +42,5 @@ yarn-error.log*
 
 # project-cleanup:start
 /_archived/
-/plan.md
-/backlog.md
-/_handoff-session-*.md
-/AGENTS.md
-/CLAUDE.md
 /DESIGN.md
 # project-cleanup:end
