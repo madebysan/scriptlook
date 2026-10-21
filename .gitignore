@@ -40,7 +40,5 @@ yarn-error.log*
 /work/
 /output/
 
-# project-cleanup:start
+# Local cleanup archive
 /_archived/
-/DESIGN.md
-# project-cleanup:end
