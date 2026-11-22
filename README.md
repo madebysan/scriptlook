@@ -30,7 +30,7 @@ Your OpenAI or Claude key turns the screenplay into structured scenes, character
 
 ## Privacy
 
-There's no database or analytics. Your keys and the active project stay in the browser's `localStorage`, PDFs are parsed in the browser, and generation sends the extracted text only to the providers you picked. Generated deck text is also cached in a `.cache/` folder next to the app, so repeating a run on the same breakdown doesn't call the provider twice; delete the folder any time. Check their pricing and data policies before sending material you don't own. The hosted site at scriptlook.com shows example decks only and accepts no uploads or keys.
+There's no database or analytics. Your keys and the active project stay in the browser's `localStorage`, PDFs are parsed in the browser, and generation sends the extracted text only to the providers you picked. Check their pricing and data policies before sending material you don't own. Generated deck text is also cached in a `.cache/` folder next to the app, so repeating a run on the same breakdown doesn't call the provider twice; delete the folder any time. The hosted site at scriptlook.com shows example decks only and accepts no uploads or keys.
 
 ## Install
 

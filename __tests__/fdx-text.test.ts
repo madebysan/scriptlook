@@ -54,6 +54,35 @@ describe("fdxToPlainText", () => {
     expect(headings).toHaveLength(2);
   });
 
+  it("leaves out script notes, scene summaries and arc beats", () => {
+    const fdx = `<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script">
+  <Content>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Title="Kitchen">
+        <Summary><Paragraph><Text>Private summary of the scene.</Text></Paragraph></Summary>
+        <SceneArcBeats>
+          <CharacterArcBeat Name="MARA"><Paragraph><Text>Private arc beat.</Text></Paragraph></CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>INT. KITCHEN - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Character"><Text>MARA</Text></Paragraph>
+    <Paragraph Type="Dialogue">
+      <ScriptNote ID="1"><Paragraph><Text>Private note to self.</Text></Paragraph></ScriptNote>
+      <Text>Not again.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical"><Text>(beat)</Text></Paragraph>
+    <Paragraph Type="Dialogue"><Text>Not today.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const text = fdxToPlainText(fdx);
+    expect(text).toBe(
+      ["INT. KITCHEN - DAY", "", "MARA", "Not again.", "(beat)", "Not today."].join("\n"),
+    );
+    expect(text).not.toMatch(/Private/);
+  });
+
   it("returns text that is not Final Draft XML unchanged", () => {
     const plain = "INT. KITCHEN - DAY\n\nMara pours coffee.";
     expect(fdxToPlainText(plain)).toBe(plain);

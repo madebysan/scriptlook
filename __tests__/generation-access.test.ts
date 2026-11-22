@@ -30,13 +30,19 @@ describe("generation access classification", () => {
 });
 
 describe("image generation error status", () => {
-  const providerError = (status: number, message: string) =>
-    Object.assign(new Error(message), { status });
+  // Same shape the fal.ai client throws: the message is the HTTP status text
+  // and the provider's reason, when there is one, sits in `body.detail`.
+  const providerError = (status: number, message: string, detail?: string) =>
+    Object.assign(new Error(message), { status, body: detail ? { detail } : undefined });
 
   it("reports an empty fal.ai balance as 402 so the image queue can stop", () => {
     expect(
       getImageGenerationErrorStatus(
-        providerError(403, "User is locked. Reason: Exhausted balance. Top up your balance."),
+        providerError(
+          403,
+          "Forbidden",
+          "User is locked. Reason: Exhausted balance. Top up your balance at fal.ai/dashboard/billing.",
+        ),
       ),
     ).toBe(402);
     expect(getImageGenerationErrorStatus(providerError(402, "Payment Required"))).toBe(402);

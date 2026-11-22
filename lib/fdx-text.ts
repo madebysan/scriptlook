@@ -40,12 +40,19 @@ function childrenNamed(parent: Element, name: string): Element[] {
   return Array.from(parent.children).filter((child) => child.tagName === name);
 }
 
-// One output line per <Paragraph> that directly holds <Text> runs. Wrapper
-// paragraphs (dual dialogue) have no direct text and are skipped; the
+// Elements whose <Paragraph> children are screenplay text. Final Draft also
+// nests paragraphs inside a script paragraph for material that is not part of
+// the script: script notes, scene summaries, character arc beats. Those are the
+// writer's private working notes and must not reach the model as scene text.
+const SCRIPT_PARAGRAPH_PARENTS = new Set(["Content", "DualDialogue"]);
+
+// One output line per script <Paragraph> that directly holds <Text> runs.
+// Wrapper paragraphs (dual dialogue) have no direct text and are skipped; the
 // paragraphs nested inside them are visited on their own.
 function paragraphLines(content: Element, compact: boolean): string[] {
   const lines: string[] = [];
   for (const paragraph of Array.from(content.getElementsByTagName("Paragraph"))) {
+    if (!SCRIPT_PARAGRAPH_PARENTS.has(paragraph.parentElement?.tagName ?? "")) continue;
     const line = childrenNamed(paragraph, "Text")
       .map((run) => run.textContent ?? "")
       .join("")

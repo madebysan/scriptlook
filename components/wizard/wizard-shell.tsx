@@ -410,6 +410,21 @@ export function WizardShell() {
   const imageInFlightRef = useRef(0);
   const imageCancelRef = useRef(false);
 
+  // Leaving the workspace (Share, or the logo link) is a client-side
+  // navigation, so the image worker would otherwise keep draining its queue
+  // from an unmounted shell: no progress badge, no way to cancel, and saves
+  // racing the next shell's. Stop new work when the shell goes away. Requests
+  // already in flight still finish, as they do on a manual cancel.
+  useEffect(() => {
+    const queue = imageQueueRef.current;
+    const enqueuedKeys = imageEnqueuedKeysRef.current;
+    return () => {
+      imageCancelRef.current = true;
+      queue.length = 0;
+      enqueuedKeys.clear();
+    };
+  }, []);
+
   // Accumulator refs stay in sync with state so concurrent tasks can merge
   // results without clobbering each other. Declared BEFORE the auto-enqueue
   // effect so hydration syncs land before we start reading refs.
