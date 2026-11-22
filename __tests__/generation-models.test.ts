@@ -14,11 +14,11 @@ import {
 
 describe("generation model selection", () => {
   it("keeps an allowed text model for its provider", () => {
-    expect(normalizeTextModel("openai", "gpt-5.6-luna")).toBe("gpt-5.6-luna");
+    expect(normalizeTextModel("openai", "gpt-6-luna")).toBe("gpt-6-luna");
   });
 
   it("rejects a model from a different provider", () => {
-    expect(normalizeTextModel("anthropic", "gpt-5.6-sol")).toBe(
+    expect(normalizeTextModel("anthropic", "gpt-6.2-sol")).toBe(
       getTextProviderOption("anthropic").model,
     );
   });

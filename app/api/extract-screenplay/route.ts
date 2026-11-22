@@ -1,20 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { TextProvider } from "@/lib/ai-providers";
+import {
+  EXTRACTION_MODELS,
+  getTextProviderOption,
+  isExtractionProvider,
+  type TextProvider,
+} from "@/lib/ai-providers";
 import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
-import { mapTextProviderError } from "@/lib/text-provider-errors";
+import { mapTextProviderError, TextProviderRequestError } from "@/lib/text-provider-errors";
 import { resolveTextGenerationAccess } from "@/lib/generation-access";
+import {
+  isClaudeReplyCutOff,
+  postToProvider,
+  readChatCompletionText,
+  readClaudeText,
+} from "@/lib/text-generation";
 
-// Allow the serverless function to run for up to 5 minutes — extraction at
-// max_tokens=64k can legitimately take 1-3 minutes on a feature-length script.
-// Default Vercel timeout would kill it mid-response.
+// Allow the serverless function to run for up to 5 minutes — extraction of a
+// feature-length script can legitimately take several minutes. Default Vercel
+// timeout would kill it mid-response.
 export const maxDuration = 300;
 
 // Stage 0 is a mechanical extraction pass, not creative deck writing. OpenAI
-// and Claude are both supported through the provider selected in the local app.
-const OPENAI_EXTRACTION_MODEL = "gpt-5.4-nano";
-const ANTHROPIC_EXTRACTION_MODEL = "claude-haiku-4-5-20251001";
-const EXTRACTION_MAX_TOKENS = 64_000;
+// and Claude are both supported through the provider selected in the local
+// app; the model for each lives in EXTRACTION_MODELS.
+//
+// The ceiling is the most either model can write in one reply. The breakdown
+// of a feature script runs to tens of thousands of tokens, and the model's own
+// thinking is counted against the same ceiling, so there is no reason to ask
+// for less.
+const EXTRACTION_MAX_TOKENS = 128_000;
 
 type ExtractionUsage = {
   input_tokens: number;
@@ -26,7 +41,7 @@ type ExtractionUsage = {
 type OpenAIExtractionResponse = {
   choices?: {
     finish_reason?: string | null;
-    message?: { content?: string | null };
+    message?: { content?: string | null; refusal?: string | null };
   }[];
   usage?: {
     prompt_tokens?: number;
@@ -62,10 +77,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (
-      extractionProvider !== "anthropic" &&
-      extractionProvider !== "openai"
-    ) {
+    if (!isExtractionProvider(extractionProvider)) {
       return NextResponse.json(
         { error: "PDF extraction currently supports OpenAI or Claude. Select one of those providers or use Paste JSON." },
         { status: 400 },
@@ -105,8 +117,11 @@ export async function POST(request: NextRequest) {
       output = validJson;
     } else {
       if (!client) throw new Error("Anthropic extraction client is unavailable");
+      // No `thinking` or effort setting: the default is the one configuration
+      // every current Claude model accepts, and it keeps the cached prompt
+      // prefix stable from one upload to the next.
       const stream = client.messages.stream({
-        model: ANTHROPIC_EXTRACTION_MODEL,
+        model: EXTRACTION_MODELS.anthropic.id,
         max_tokens: EXTRACTION_MAX_TOKENS,
         messages: [
           {
@@ -128,10 +143,10 @@ export async function POST(request: NextRequest) {
       const message = await stream.finalMessage();
       extractionUsage = message.usage;
       stopReason = message.stop_reason;
-      if (message.stop_reason === "max_tokens") {
+      if (isClaudeReplyCutOff(message)) {
         throw new Error("screenplay_too_long");
       }
-      const rawOutput = message.content[0]?.type === "text" ? message.content[0].text : "";
+      const rawOutput = readClaudeText(message);
       const validJson = extractJson(rawOutput);
       if (!validJson) {
         console.error("[extract-screenplay] could not extract JSON", {
@@ -173,6 +188,24 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
+    // A reply the provider withheld (422) or never finished (504). Extraction
+    // always runs on one fixed model per provider, so the way round either is
+    // the other provider, not another model.
+    if (
+      error instanceof TextProviderRequestError &&
+      (error.status === 422 || error.status === 504) &&
+      isExtractionProvider(extractionProvider)
+    ) {
+      const label = getTextProviderOption(extractionProvider).label;
+      const otherLabel = getTextProviderOption(
+        extractionProvider === "anthropic" ? "openai" : "anthropic",
+      ).label;
+      const message =
+        error.status === 504
+          ? `${label} took too long to read this screenplay. Try again, or switch the provider to ${otherLabel}.`
+          : `${label} declined to read this screenplay. Its safety filter sometimes stops on screenplay material. Switch the provider to ${otherLabel} and try again.`;
+      return NextResponse.json({ error: message }, { status: error.status });
+    }
     const providerError = mapTextProviderError(error, extractionProvider, "screenplay extraction");
     return NextResponse.json(
       { error: providerError.message },
@@ -192,23 +225,26 @@ async function callOpenAIExtraction({
   stopReason: string | null;
   usage: ExtractionUsage | undefined;
 }> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: OPENAI_EXTRACTION_MODEL,
+  const response = await postToProvider(
+    "openai",
+    "https://api.openai.com/v1/chat/completions",
+    { authorization: `Bearer ${apiKey}` },
+    {
+      model: EXTRACTION_MODELS.openai.id,
       reasoning_effort: "low",
       max_completion_tokens: EXTRACTION_MAX_TOKENS,
       response_format: { type: "json_object" },
+      // GPT-6 takes instructions in a "developer" message. JSON mode needs the
+      // word JSON in the conversation, so the user message says it as well.
       messages: [
-        { role: "system", content: STAGE_0_PROMPT },
-        { role: "user", content: `--- SCREENPLAY ---\n\n${text}` },
+        { role: "developer", content: STAGE_0_PROMPT },
+        {
+          role: "user",
+          content: `Return the JSON breakdown for this screenplay.\n\n--- SCREENPLAY ---\n\n${text}`,
+        },
       ],
-    }),
-  });
+    },
+  );
 
   if (!response.ok) {
     const details = await response.text();
@@ -216,12 +252,15 @@ async function callOpenAIExtraction({
   }
 
   const data = (await response.json()) as OpenAIExtractionResponse;
-  const output = data.choices?.[0]?.message?.content?.trim() || "";
-  if (!output) throw new Error("OpenAI returned no screenplay extraction");
+  const stopReason = data.choices?.[0]?.finish_reason || null;
+  // A reply cut off at the ceiling is reported by the caller as "too long".
+  // Any other reply has to carry an answer: this throws on a withheld or
+  // empty one.
+  const output = stopReason === "length" ? "" : readChatCompletionText(data, "openai");
 
   return {
     output,
-    stopReason: data.choices?.[0]?.finish_reason || null,
+    stopReason,
     usage: data.usage
       ? {
           input_tokens: data.usage.prompt_tokens || 0,

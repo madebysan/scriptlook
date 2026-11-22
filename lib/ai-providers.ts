@@ -28,10 +28,10 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     id: "anthropic",
     label: "Claude",
     company: "Anthropic",
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-haiku-5-5",
     models: [
-      { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", tier: "economy", description: "Fastest, lowest-cost deck pass." },
-      { id: "claude-sonnet-4-5-20250929", label: "Claude Sonnet 4.5", tier: "recommended", description: "Stronger writing and creative judgment." },
+      { id: "claude-haiku-5-5", label: "Claude Haiku 5.5", tier: "economy", description: "Fastest, lowest-cost deck pass." },
+      { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5", tier: "recommended", description: "Stronger writing and creative judgment." },
     ],
     description: "Strong default for report writing.",
     keyLabel: "Claude API key",
@@ -42,11 +42,11 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     id: "openai",
     label: "OpenAI",
     company: "OpenAI",
-    model: "gpt-5.6-terra",
+    model: "gpt-6.1-terra",
     models: [
-      { id: "gpt-5.6-luna", label: "GPT-5.6 Luna", tier: "economy", description: "Efficient for high-volume report generation." },
-      { id: "gpt-5.6-terra", label: "GPT-5.6 Terra", tier: "recommended", description: "Best balance of quality and cost." },
-      { id: "gpt-5.6-sol", label: "GPT-5.6 Sol", tier: "premium", description: "Highest-quality OpenAI deck pass." },
+      { id: "gpt-6-luna", label: "GPT-6 Luna", tier: "economy", description: "Efficient for high-volume report generation." },
+      { id: "gpt-6.1-terra", label: "GPT-6.1 Terra", tier: "recommended", description: "Best balance of quality and cost." },
+      { id: "gpt-6.2-sol", label: "GPT-6.2 Sol", tier: "premium", description: "Highest-quality OpenAI deck pass." },
     ],
     description: "Fast general-purpose report pass.",
     keyLabel: "OpenAI API key",
@@ -57,9 +57,9 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     id: "deepseek",
     label: "DeepSeek",
     company: "DeepSeek",
-    model: "deepseek-v4-flash",
+    model: "deepseek-flash",
     models: [
-      { id: "deepseek-v4-flash", label: "DeepSeek V4 Flash", tier: "economy", description: "Low-cost, fast report generation." },
+      { id: "deepseek-flash", label: "DeepSeek Flash", tier: "economy", description: "Low-cost, fast report generation." },
     ],
     description: "Low-cost OpenAI-compatible option.",
     keyLabel: "DeepSeek API key",
@@ -70,10 +70,10 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     id: "gemini",
     label: "Gemini",
     company: "Google",
-    model: "gemini-3.5-flash",
+    model: "gemini-4-hydrogen",
     models: [
-      { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", tier: "economy", description: "Lowest-cost Google text pass." },
-      { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", tier: "recommended", description: "Stronger long-context deck generation." },
+      { id: "gemini-3.5-flash-lite", label: "Gemini 3.5 Flash-Lite", tier: "economy", description: "Lowest-cost Google text pass." },
+      { id: "gemini-4-hydrogen", label: "Gemini 4 Hydrogen", tier: "recommended", description: "Stronger long-context deck generation." },
     ],
     description: "Long-context Google model.",
     keyLabel: "Gemini API key",
@@ -81,6 +81,28 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     placeholder: "AIza...",
   },
 ];
+
+// Screenplay extraction is a mechanical pass, so it always runs on the
+// provider's low-cost model, whatever model is picked for writing the deck.
+export type ExtractionProvider = "anthropic" | "openai";
+
+export const EXTRACTION_MODELS: Record<ExtractionProvider, { id: string; label: string }> = {
+  anthropic: { id: "claude-haiku-5-5", label: "Claude Haiku 5.5" },
+  openai: { id: "gpt-6-luna", label: "GPT-6 Luna" },
+};
+
+export function isExtractionProvider(value: unknown): value is ExtractionProvider {
+  return value === "anthropic" || value === "openai";
+}
+
+// Model for a call that must return bare JSON as its text (the shot list).
+// Google documents that Gemini 4 can answer a plain-text request for raw JSON
+// with a malformed tool call instead of an answer, so on Gemini these calls run
+// on Flash-Lite, which that warning does not cover. Other providers keep the
+// model that was picked.
+export function getJsonReplyModel(provider: TextProvider, model: string): string {
+  return provider === "gemini" ? "gemini-3.5-flash-lite" : model;
+}
 
 export function isTextProvider(value: unknown): value is TextProvider {
   return typeof value === "string" && (TEXT_PROVIDERS as readonly string[]).includes(value);

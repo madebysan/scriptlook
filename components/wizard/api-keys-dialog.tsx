@@ -9,7 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getTextProviderOption, type TextProvider } from "@/lib/ai-providers";
+import {
+  EXTRACTION_MODELS,
+  getTextProviderOption,
+  isExtractionProvider,
+  type TextProvider,
+} from "@/lib/ai-providers";
 import { TextProviderFields } from "@/components/wizard/text-provider-fields";
 import { cn } from "@/lib/utils";
 
@@ -158,9 +163,8 @@ export function ApiKeysDialog({
 
           {confirmationMode && (
             <div className="border border-foreground px-3 py-2.5 text-[12px]">
-              Extraction model: {apiProvider === "openai"
-                ? "GPT-5.4 Nano"
-                : "Claude Haiku 4.5"}
+              Extraction model:{" "}
+              {EXTRACTION_MODELS[isExtractionProvider(apiProvider) ? apiProvider : "anthropic"].label}
             </div>
           )}
 

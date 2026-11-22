@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   IMAGE_NEGATIVE_PROMPTS,
+  NO_TEXT_INSTRUCTION,
 } from "@/lib/image-prompts";
 import { createFalClientWithCredentials } from "@/lib/fal-client";
 import { generateFalImage } from "@/lib/fal-image-generation";
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const locationName = typeof name === "string" && name.trim() ? name.trim() : "Unknown location";
-    const locationPrompt = `Prompt context location name: ${locationName}. ${prompt.trim()}. No text or labels in the image.`;
+    const locationPrompt = `Prompt context location name: ${locationName}. ${prompt.trim()}. ${NO_TEXT_INSTRUCTION}`;
 
     const imageUrl = await generateFalImage({
       client: falClient, model: body.imageModel, kind: "location", prompt: locationPrompt,

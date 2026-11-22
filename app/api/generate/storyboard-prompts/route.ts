@@ -8,7 +8,7 @@ import { mapTextProviderError } from "@/lib/text-provider-errors";
 const SLUG = "storyboard-prompts";
 
 // Per-scene prompts scale with scene count; allow up to 5 minutes so a
-// feature-length storyboard set (up to 32k output tokens) finishes without truncation.
+// feature-length storyboard set finishes without truncation.
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       apiKey,
       provider,
       model,
-      maxTokens: 32000,
+      outputSize: "long",
     });
     setCache(SLUG, jsonData, markdown, `${provider}:${model}`);
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getJsonReplyModel } from "@/lib/ai-providers";
 import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { SHOT_LIST_SYSTEM_PROMPT, parseAiShots } from "@/lib/shot-list";
 import { mapTextProviderError } from "@/lib/text-provider-errors";
@@ -35,8 +36,8 @@ export async function POST(request: NextRequest) {
     const raw = await generateDocument(SHOT_LIST_SYSTEM_PROMPT, input, {
       apiKey,
       provider,
-      model,
-      maxTokens: 1500,
+      model: getJsonReplyModel(provider, model),
+      outputSize: "short",
     });
 
     const shots = parseAiShots(raw, sceneNumber);

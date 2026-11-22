@@ -54,6 +54,11 @@ export const GESTURE_DRAW_LORA_SCALES: Record<ImagePromptKind, number> = {
 
 export const GESTURE_DRAW_TRIGGER = "gstdrw style";
 
+// The text ban has to live in the prompt itself. fal's published inputs for
+// its FLUX LoRA endpoint do not list `negative_prompt`, so the negative
+// prompts above cannot be relied on to keep lettering out of a frame.
+export const NO_TEXT_INSTRUCTION = "No text or labels in the image.";
+
 export const IMAGE_PROMPT_STORAGE = "scriptlook-image-prompts";
 
 type StoredPrompts = Partial<Record<ImagePromptKind, string>>;
@@ -84,9 +89,11 @@ export function buildFalGesturePrompt(
   subjectPrompt: string,
 ): string {
   const style = resolveImageStylePrompt(kind, stylePrefix);
-  return [GESTURE_DRAW_TRIGGER, style, subjectPrompt.trim()]
+  const prompt = [GESTURE_DRAW_TRIGGER, style, subjectPrompt.trim()]
     .filter(Boolean)
     .join(". ");
+  if (prompt.includes(NO_TEXT_INSTRUCTION)) return prompt;
+  return `${prompt.replace(/[.\s]+$/, "")}. ${NO_TEXT_INSTRUCTION}`;
 }
 
 export function loadImagePrompts(): StoredPrompts {
