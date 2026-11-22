@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Security updates: Next.js 16.4 fixes a critical advisory, and PDF.js 6.4 fixes a malicious-PDF advisory.
+- More security updates: Next.js 16.4.6 fixes a newer critical advisory, along with patched Undici, Vite and Zod.
 - Final Draft (FDX) files are read as screenplay text instead of raw XML, which uses far fewer tokens and no longer shows a false "no scene headings" warning.
 - Image generation stops and tells you when your fal.ai balance runs out, instead of failing every remaining image.
 - A deck without a TMDB key no longer fires failed poster lookups.
