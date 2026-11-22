@@ -4,7 +4,7 @@ import {
 } from "@/lib/image-prompts";
 import { createFalClientWithCredentials } from "@/lib/fal-client";
 import { generateFalImage } from "@/lib/fal-image-generation";
-import { getGenerationAccessErrorStatus, resolveImageGenerationAccess } from "@/lib/generation-access";
+import { getImageGenerationErrorStatus, resolveImageGenerationAccess } from "@/lib/generation-access";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     console.error("Poster image generation error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Image generation failed" },
-      { status: getGenerationAccessErrorStatus(error) }
+      { status: getImageGenerationErrorStatus(error) }
     );
   }
 }

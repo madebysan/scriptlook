@@ -4,16 +4,16 @@ import {
 } from "@/lib/image-prompts";
 import { createFalClientWithCredentials } from "@/lib/fal-client";
 import { generateFalImage } from "@/lib/fal-image-generation";
-import { getGenerationAccessErrorStatus, resolveImageGenerationAccess } from "@/lib/generation-access";
+import { getImageGenerationErrorStatus, resolveImageGenerationAccess } from "@/lib/generation-access";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { description, name, stylePrefix } = body;
 
-    if (!description) {
+    if (!description && !name) {
       return NextResponse.json(
-        { error: "Missing description" },
+        { error: "Missing character name or description" },
         { status: 400 }
       );
     }
@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing fal.ai API key" }, { status: 400 });
     }
 
-    const prompt = `Character: ${name || "Unknown"}. ${description}`;
+    const prompt = description
+      ? `Character: ${name || "Unknown"}. ${description}`
+      : `Character: ${name}.`;
 
     const imageUrl = await generateFalImage({
       client: falClient, model: body.imageModel, kind: "portrait", prompt,
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     console.error("Portrait generation error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Portrait generation failed" },
-      { status: getGenerationAccessErrorStatus(error) }
+      { status: getImageGenerationErrorStatus(error) }
     );
   }
 }

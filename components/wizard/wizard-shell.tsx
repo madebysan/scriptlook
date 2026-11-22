@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Settings, RotateCcw, FileText, Download, Share2, Images, Loader2 } from "lucide-react";
 import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
@@ -64,7 +65,7 @@ import {
   getLocationImageKey,
   getPriorityLocations,
 } from "@/lib/location-images";
-import { cn, downloadBlob } from "@/lib/utils";
+import { downloadBlob } from "@/lib/utils";
 import { normalizeScreenplayData } from "@/lib/schema";
 import {
   DEFAULT_DELIVERABLES,
@@ -94,6 +95,7 @@ function buildPendingDocuments(deliverables: readonly DeliverableId[]): Document
 }
 
 export function WizardShell() {
+  const router = useRouter();
   const {
     apiProvider,
     apiKey,
@@ -823,23 +825,12 @@ export function WizardShell() {
 
   const hasActiveProject = currentStep === 3;
   const hasSelectedImageDeliverables = hasImageDeliverables(deliverables);
-  const settingsIsPaper = true;
-  const settingsInputClass = cn(
-    "w-full px-3 py-2.5 font-mono text-[13px] placeholder:text-muted-foreground/50 focus:outline-none",
-    settingsIsPaper
-      ? "border border-border bg-background/60 text-foreground [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20"
-      : "rounded-[8px] bg-card/60 shadow-pill focus:shadow-paper-hover",
-  );
-  const settingsTextareaClass = cn(
-    "w-full resize-y px-3 py-2.5 font-mono text-[12px] leading-[1.55] text-foreground/90 placeholder:text-muted-foreground/50 focus:outline-none",
-    settingsIsPaper
-      ? "border border-border bg-background/60 [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20"
-      : "rounded-[8px] bg-card/60 shadow-pill focus:shadow-paper-hover",
-  );
-  const settingsSectionLabelClass = cn(
-    "font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b",
-    settingsIsPaper ? "border-foreground" : "border-border/60",
-  );
+  const settingsInputClass =
+    "w-full px-3 py-2.5 font-mono text-[13px] placeholder:text-muted-foreground/50 focus:outline-none border border-border bg-background/60 text-foreground [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20";
+  const settingsTextareaClass =
+    "w-full resize-y px-3 py-2.5 font-mono text-[12px] leading-[1.55] text-foreground/90 placeholder:text-muted-foreground/50 focus:outline-none border border-border bg-background/60 [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20";
+  const settingsSectionLabelClass =
+    "font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-foreground";
 
   return (
     <div className="paper min-h-screen bg-background">
@@ -893,7 +884,7 @@ export function WizardShell() {
                   icon={<Share2 size={14} />}
                   label="Share"
                   audioCue="open"
-                  onClick={() => { window.location.href = "/app/share"; }}
+                  onClick={() => router.push("/app/share")}
                   title="Open share view"
                 />
               )}
@@ -1109,20 +1100,10 @@ export function WizardShell() {
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent
-          className={cn(
-            "max-h-[85vh] overflow-y-auto sm:max-w-2xl",
-            settingsIsPaper &&
-              "paper border-2 border-foreground bg-[var(--paper-sheet)] text-foreground shadow-[8px_8px_0_rgba(17,17,17,0.18)] [border-radius:0!important]",
-          )}
+          className="paper max-h-[85vh] overflow-y-auto border-2 border-foreground bg-[var(--paper-sheet)] text-foreground shadow-[8px_8px_0_rgba(17,17,17,0.18)] [border-radius:0!important] sm:max-w-2xl"
         >
           <DialogHeader>
-            <DialogTitle
-              className={
-                settingsIsPaper
-                  ? "form-sec-head text-[22px] text-foreground"
-                  : "tracking-normal"
-              }
-            >
+            <DialogTitle className="form-sec-head text-[22px] text-foreground">
               Settings
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -1142,7 +1123,7 @@ export function WizardShell() {
               onProviderChange={handleTextProviderChange}
               onApiKeyChange={setApiKey}
               onModelChange={setTextModel}
-              surface={settingsIsPaper ? "paper" : "default"}
+              surface="paper"
             />
             <div className="space-y-2">
               <label className="text-[13px] font-medium tracking-normal">

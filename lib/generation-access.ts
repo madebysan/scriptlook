@@ -32,6 +32,32 @@ export function resolveImageGenerationAccess(body: {
   return { apiKey: requireClientKey(body.apiKey) };
 }
 
+const IMAGE_BILLING_ERROR_RE =
+  /(exhausted balance|insufficient|billing|payment|quota|top up|locked)/i;
+
+// Status for a failed image request. fal.ai errors carry the provider's HTTP
+// status and message; an empty balance arrives as a 403 "user is locked"
+// rather than a 402. Report those as 402 so the image queue can stop and tell
+// the user, instead of failing every remaining image one by one. A rejected
+// key (401) and a rate limit (429) pass through; everything else stays 500.
+export function getImageGenerationErrorStatus(error: unknown): number {
+  const accessStatus = getGenerationAccessErrorStatus(error);
+  if (accessStatus !== 500) return accessStatus;
+
+  const status =
+    typeof error === "object" && error !== null && "status" in error
+      ? (error as { status: unknown }).status
+      : null;
+  const message = error instanceof Error ? error.message : "";
+
+  if (status === 402 || ((status === 401 || status === 403) && IMAGE_BILLING_ERROR_RE.test(message))) {
+    return 402;
+  }
+  if (status === 401 || status === 403) return 401;
+  if (status === 429) return 429;
+  return 500;
+}
+
 export function getGenerationAccessErrorStatus(error: unknown): number {
   const message = error instanceof Error ? error.message : "";
   if (message === "Unauthorized") return 401;

@@ -302,7 +302,8 @@ export function CastAndCrewViewer({
       // Malformed JSON — shouldn't happen, but fail silently.
     }
   }
-  const data = parseData(jsonData);
+  // Parse once per jsonData change so the insights memo below can hold.
+  const data = useMemo(() => parseData(jsonData), [jsonData]);
   const characters = data.characters || [];
   const [tab, setTab] = useState<"cast" | "insights">("cast");
 

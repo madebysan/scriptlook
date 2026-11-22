@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocument } from "@/lib/claude";
-import { resolveTextGenerationConfig } from "@/lib/text-generation";
+import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { SHOT_LIST_SYSTEM_PROMPT, parseAiShots } from "@/lib/shot-list";
 import { mapTextProviderError } from "@/lib/text-provider-errors";
 

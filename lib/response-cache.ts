@@ -10,7 +10,10 @@ const CACHE_DIR = join(process.cwd(), ".cache");
 
 function cacheKey(slug: string, jsonData: string, provider = "anthropic"): string {
   const hash = createHash("sha256").update(jsonData).digest("hex").slice(0, 12);
-  return `${slug}-${provider}-${hash}`;
+  // The provider label can carry characters ("anthropic:model-id") that are
+  // not valid in file names on every platform.
+  const safeProvider = provider.replace(/[^a-zA-Z0-9._-]/g, "-");
+  return `${slug}-${safeProvider}-${hash}`;
 }
 
 export function getCached(slug: string, jsonData: string, provider?: string): string | null {

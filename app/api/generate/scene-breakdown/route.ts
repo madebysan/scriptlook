@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocument } from "@/lib/claude";
-import { resolveTextGenerationConfig } from "@/lib/text-generation";
+import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { SCENE_BREAKDOWN_PROMPT } from "@/lib/prompts/scene-breakdown";
 import { trimForSceneBreakdown } from "@/lib/json-trimmer";
 import { getCached, setCache } from "@/lib/response-cache";

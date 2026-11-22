@@ -20,6 +20,12 @@ const SHOT_SIZES: ShotSize[] = ["EWS", "WS", "MS", "MCU", "CU", "OTS", "INSERT"]
 const MAX_HEURISTIC_SHOTS = 6;
 const MAX_AI_SHOTS = 10;
 
+// Scene fields are full sentences more often than not. Drop their closing
+// punctuation before placing them inside a sentence of our own.
+function withoutClosingPunctuation(text: string): string {
+  return text.trim().replace(/[.!?…\s]+$/, "");
+}
+
 function isExterior(scene: Scene): boolean {
   return (scene.int_ext || "").toUpperCase().includes("EXT");
 }
@@ -40,7 +46,7 @@ export function suggestShots(scene: Scene): Shot[] {
     movement: exterior ? "Slow push in" : "Static",
     description: exterior
       ? `Establishing wide of ${scene.location || "the location"} to place the action.`
-      : `Master covering ${scene.key_visual_moment || scene.slug_line || "the full scene"}.`,
+      : `Master covering ${withoutClosingPunctuation(scene.key_visual_moment || scene.slug_line || "") || "the full scene"}.`,
     source: "heuristic",
   });
 
@@ -79,7 +85,7 @@ export function suggestShots(scene: Scene): Shot[] {
       size: "CU",
       subject: cast[0],
       movement: "Static",
-      description: `Reaction close-up on ${cast[0]}: ${scene.emotional_beat}.`,
+      description: `Reaction close-up on ${cast[0]}: ${withoutClosingPunctuation(scene.emotional_beat)}.`,
       source: "heuristic",
     });
   }

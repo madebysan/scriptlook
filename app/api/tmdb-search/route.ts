@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
 
   const apiKey = (clientKey && clientKey.trim()) || process.env.TMDB_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "TMDB_API_KEY not configured" }, { status: 500 });
+    // TMDB is optional. Without a key there are simply no posters to show, so
+    // answer with an empty result instead of an error on every deck view.
+    return NextResponse.json({ films: [], configured: false });
   }
 
   const resolved: ResolvedFilm[] = await Promise.all(

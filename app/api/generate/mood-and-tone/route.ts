@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocument } from "@/lib/claude";
-import { resolveTextGenerationConfig } from "@/lib/text-generation";
+import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { MOOD_AND_TONE_PROMPT } from "@/lib/prompts/mood-and-tone";
 import { trimForMoodAndTone } from "@/lib/json-trimmer";
 import { getCached, setCache } from "@/lib/response-cache";

@@ -53,9 +53,14 @@ export function EditableText({
   }[multilineSize];
   const multilineRows = { compact: 2, medium: 4, long: 6 }[multilineSize];
 
-  useEffect(() => {
+  // Reset the draft when the saved value changes from outside (for example
+  // after a regenerate). Adjusting state during render avoids the extra
+  // effect pass.
+  const [syncedValue, setSyncedValue] = useState(value);
+  if (value !== syncedValue) {
+    setSyncedValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   useEffect(() => {
     if (editing && inputRef.current) {

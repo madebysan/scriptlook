@@ -111,36 +111,38 @@ export function ShareableView({
     }
   }, [project.jsonData]);
 
-  const overviewDoc = project.documents.find((d) => d.slug === "overview");
-  const moodDoc = project.documents.find((d) => d.slug === "mood-and-tone");
-  const sceneDoc = project.documents.find((d) => d.slug === "scene-breakdown");
-  const storyboardDoc = project.documents.find(
-    (d) => d.slug === "storyboard-prompts",
-  );
-  const posterDoc = project.documents.find((d) => d.slug === "poster-concepts");
+  // Memoize on the content strings themselves (not `doc?.content` paths) so
+  // each parse reruns only when its own document text changes.
+  const documentContent = (slug: string) =>
+    project.documents.find((d) => d.slug === slug)?.content ?? null;
+  const overviewContent = documentContent("overview");
+  const moodContent = documentContent("mood-and-tone");
+  const sceneContent = documentContent("scene-breakdown");
+  const storyboardContent = documentContent("storyboard-prompts");
+  const posterContent = documentContent("poster-concepts");
 
   const overview = useMemo(
-    () => (overviewDoc?.content ? parseOverview(overviewDoc.content) : null),
-    [overviewDoc?.content],
+    () => (overviewContent ? parseOverview(overviewContent) : null),
+    [overviewContent],
   );
   const mood = useMemo(
-    () => (moodDoc?.content ? parseMoodAndTone(moodDoc.content) : null),
-    [moodDoc?.content],
+    () => (moodContent ? parseMoodAndTone(moodContent) : null),
+    [moodContent],
   );
   const sceneBreakdown = useMemo(
-    () => (sceneDoc?.content ? parseSceneBreakdown(sceneDoc.content) : null),
-    [sceneDoc?.content],
+    () => (sceneContent ? parseSceneBreakdown(sceneContent) : null),
+    [sceneContent],
   );
   const storyboardByScene = useMemo((): Record<number, StoryboardScene> => {
-    if (!storyboardDoc?.content) return {};
-    const { acts } = parseStoryboardPrompts(storyboardDoc.content);
+    if (!storyboardContent) return {};
+    const { acts } = parseStoryboardPrompts(storyboardContent);
     const out: Record<number, StoryboardScene> = {};
     for (const act of acts) for (const s of act.scenes) out[s.number] = s;
     return out;
-  }, [storyboardDoc?.content]);
+  }, [storyboardContent]);
   const posterConcepts = useMemo(
-    () => (posterDoc?.content ? parsePosterConcepts(posterDoc.content) : null),
-    [posterDoc?.content],
+    () => (posterContent ? parsePosterConcepts(posterContent) : null),
+    [posterContent],
   );
 
   const portraits = project.portraits ?? EMPTY_NAMED_IMAGES;

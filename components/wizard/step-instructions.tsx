@@ -6,6 +6,7 @@ import { validateScreenplayJson } from "@/lib/schema";
 import { Check, Copy, ChevronDown, Loader2, Upload } from "lucide-react";
 import { useApiKeys } from "@/lib/api-keys-context";
 import { extractPdfText } from "@/lib/pdf-text";
+import { fdxToPlainText } from "@/lib/fdx-text";
 import {
   Dialog,
   DialogContent,
@@ -205,10 +206,16 @@ export function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => 
 
     try {
       // Pull plain text out of the file in the browser — a PDF goes through
-      // PDF.js, plain .txt/.fdx is read directly — then send just the text to
-      // the extraction model. Keeps PDF parsing off the serverless function.
+      // PDF.js, Final Draft XML is reduced to its screenplay lines, plain .txt
+      // is read directly — then send just the text to the extraction model.
+      // Keeps PDF parsing off the serverless function.
       const isPdf = /\.pdf$/i.test(file.name);
-      const text = isPdf ? await extractPdfText(file) : await file.text();
+      const isFdx = /\.fdx$/i.test(file.name);
+      const text = isPdf
+        ? await extractPdfText(file)
+        : isFdx
+          ? fdxToPlainText(await file.text())
+          : await file.text();
       if (!text.trim()) {
         throw new Error(
           "Couldn't read any text from that file. A scanned PDF (images only) has no selectable text — try a text-based script.",
@@ -260,6 +267,9 @@ export function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => 
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Clear the input so choosing the same file again (after a cancel or an
+    // error) still fires a change event.
+    e.target.value = "";
     if (file) handleFile(file);
   };
 

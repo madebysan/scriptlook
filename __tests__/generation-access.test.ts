@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getImageGenerationErrorStatus,
   resolveImageGenerationAccess,
   resolveTextGenerationAccess,
 } from "@/lib/generation-access";
@@ -25,5 +26,31 @@ describe("generation access classification", () => {
     expect(
       resolveTextGenerationAccess({ apiKey: undefined, apiProvider: "anthropic" }),
     ).toEqual({ apiKey: "", provider: "anthropic" });
+  });
+});
+
+describe("image generation error status", () => {
+  const providerError = (status: number, message: string) =>
+    Object.assign(new Error(message), { status });
+
+  it("reports an empty fal.ai balance as 402 so the image queue can stop", () => {
+    expect(
+      getImageGenerationErrorStatus(
+        providerError(403, "User is locked. Reason: Exhausted balance. Top up your balance."),
+      ),
+    ).toBe(402);
+    expect(getImageGenerationErrorStatus(providerError(402, "Payment Required"))).toBe(402);
+  });
+
+  it("passes a rejected key and a rate limit through", () => {
+    expect(getImageGenerationErrorStatus(providerError(401, "Unauthorized request"))).toBe(401);
+    expect(getImageGenerationErrorStatus(providerError(403, "Forbidden"))).toBe(401);
+    expect(getImageGenerationErrorStatus(providerError(429, "Too Many Requests"))).toBe(429);
+  });
+
+  it("keeps a missing key at 400 and everything else at 500", () => {
+    expect(getImageGenerationErrorStatus(new Error("Missing API key"))).toBe(400);
+    expect(getImageGenerationErrorStatus(providerError(422, "Unprocessable Entity"))).toBe(500);
+    expect(getImageGenerationErrorStatus(new Error("No image returned from FLUX"))).toBe(500);
   });
 });

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocument } from "@/lib/claude";
-import { resolveTextGenerationConfig } from "@/lib/text-generation";
+import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { POSTER_CONCEPTS_PROMPT } from "@/lib/prompts/poster-concepts";
 import { trimForPosterConcepts } from "@/lib/json-trimmer";
 import { getCached, setCache } from "@/lib/response-cache";

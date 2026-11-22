@@ -413,6 +413,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                             {posterImage?.status === "done" && posterImage.url ? (
                               <div className="relative group">
                                 <div className="overflow-hidden rounded-lg border border-border bg-muted/30" style={{ aspectRatio: "5/7" }}>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={posterImage.url}
                                     alt={`Poster sketch — ${concept.name}`}

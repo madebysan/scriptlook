@@ -147,29 +147,8 @@ export async function POST(request: NextRequest) {
       output = validJson;
     }
 
-    // Truncation detection: if we hit the output cap, the tail of the JSON is
-    // guaranteed invalid. Surface a clear error instead of a generic parse
-    // failure so the user knows to try a shorter script (chunked extraction is
-    // the planned fix for feature-length scripts that overflow 64k).
-    if (stopReason === "max_tokens") {
-      console.error("[extract-screenplay] hit max_tokens", {
-        outputLength: output.length,
-        inputTokens: extractionUsage?.input_tokens,
-        outputTokens: extractionUsage?.output_tokens,
-      });
-      return NextResponse.json(
-        {
-          error:
-            "Your screenplay was too long for one pass. Try a shorter script or split it into parts.",
-        },
-        { status: 413 },
-      );
-    }
-
-    const json = output;
-
     return NextResponse.json({
-      json,
+      json: output,
       tokens: {
         input: extractionUsage?.input_tokens,
         output: extractionUsage?.output_tokens,

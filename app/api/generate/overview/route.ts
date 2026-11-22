@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocument } from "@/lib/claude";
-import { resolveTextGenerationConfig } from "@/lib/text-generation";
+import { generateDocument, resolveTextGenerationConfig } from "@/lib/text-generation";
 import { OVERVIEW_PROMPT } from "@/lib/prompts/overview";
 import { trimForOverview } from "@/lib/json-trimmer";
 import { getCached, setCache } from "@/lib/response-cache";

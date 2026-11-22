@@ -65,7 +65,9 @@ export function ProductionViewer({
   propImages,
   onPropImagesChange,
 }: ProductionViewerProps) {
-  const data = parseData(jsonData);
+  // Parse once per jsonData change: the wardrobe grouping below depends on
+  // stable `scenes` / `characters` references to stay memoized.
+  const data = useMemo(() => parseData(jsonData), [jsonData]);
   const scenes = data.scenes ?? EMPTY_SCENES;
   const characters = data.characters ?? EMPTY_CHARACTERS;
   const propsMaster = data.props_master ?? EMPTY_PROPS;
