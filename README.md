@@ -1,5 +1,3 @@
-<p><img src="assets/app-icon.png" width="128" height="128" alt="Scriptlook app icon"></p>
-
 <h1>Scriptlook</h1>
 
 <p>Turn a screenplay into a visual deck.<br>
