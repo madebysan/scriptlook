@@ -46,7 +46,7 @@ export function StepInstructions({ onSubmitJson }: StepInstructionsProps) {
 
       {/* Field rows */}
       <FieldRow label="Production">
-        Paste a screenplay, get the deck a{" "}
+        Drop in a screenplay, get the deck a{" "}
         <span className="mark-hl">director, producer, or DP</span> can react to.
       </FieldRow>
       <FieldRow label="Deliverables">

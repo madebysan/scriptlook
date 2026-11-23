@@ -4,7 +4,11 @@
 
 - Security updates: Next.js 16.4 fixes a critical advisory, and PDF.js 6.4 fixes a malicious-PDF advisory.
 - More security updates: Next.js 16.4.6 fixes a newer critical advisory, along with patched Undici, Vite and Zod.
-- Updated to current models: Claude Haiku 5.5 and Sonnet 5.5 (Sonnet 4.5 retires on November 30, 2026), GPT-6 Luna, GPT-6.1 Terra and GPT-6.2 Sol, DeepSeek Flash, and Gemini 4 Hydrogen with Gemini 3.5 Flash-Lite.
+- Updated to current models: Claude Haiku 5.5 and Sonnet 5.5 (Sonnet 4.5 retires on November 30, 2026), GPT-6 Luna and GPT-6.1 Terra, DeepSeek Flash, and Gemini 4 Hydrogen with Gemini 3.5 Flash-Lite. Claude now starts on Sonnet 5.5.
+- The Share button is now called Print view, which is what it opens.
+- Film references on Mood & Tone no longer show an empty frame when there is no poster.
+- The Start over button is solid ink like the form's other buttons, instead of a faded red.
+- Wording: the app asks you to drop in a screenplay (it never accepted pasted text), and error messages no longer point to a hidden option.
 - Long scripts are less likely to be cut off: output limits are raised to match what the current models allow.
 - Errors from OpenAI, DeepSeek and Gemini now name the right provider instead of Claude, and a reply stopped by a provider's content filter says so.
 - Storyboard, portrait and prop prompts now ask for no text or labels in the image.

@@ -77,7 +77,7 @@ export default function Home() {
                     icon={<FileText size={18} strokeWidth={1.8} />}
                     number="01"
                     title="Script intelligence"
-                    description="Upload or paste a screenplay. Scriptlook pulls logline, tone, scenes, characters, locations, and props."
+                    description="Drop in a screenplay. Scriptlook pulls logline, tone, scenes, characters, locations, and props."
                   />
                   <CapabilityItem
                     icon={<Clapperboard size={18} strokeWidth={1.8} />}

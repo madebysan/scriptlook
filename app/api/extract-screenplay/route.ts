@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     if (!isExtractionProvider(extractionProvider)) {
       return NextResponse.json(
-        { error: "PDF extraction currently supports OpenAI or Claude. Select one of those providers or use Paste JSON." },
+        { error: "Reading a screenplay needs a Claude or OpenAI key. Select one of those providers and try again." },
         { status: 400 },
       );
     }
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     }
     if (error instanceof Error && error.message === "invalid_extraction_json") {
       return NextResponse.json(
-        { error: "The extraction model returned invalid JSON. Try again or use Paste JSON." },
+        { error: "The screenplay breakdown came back unreadable. Try again, or switch between Claude and OpenAI." },
         { status: 422 },
       );
     }

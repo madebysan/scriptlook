@@ -22,11 +22,11 @@ Scriptlook turns a screenplay or treatment into an editable visual deck, for stu
 - It runs on your own API keys, with no account to create.
 - You can edit any section in the browser, then print the deck or save it as a PDF.
 
-It doesn't do budgets, call sheets or production management. Every section, with examples, is in [docs/what-it-makes.md](docs/what-it-makes.md).
+It also makes first-pass planning views (a breakdown, a suggested schedule, a shoot plan and a shoot brief). It isn't a production management tool: no budgets, no crew scheduling, no tracking. Every section, with examples, is in [docs/what-it-makes.md](docs/what-it-makes.md).
 
 ## How it works
 
-Your OpenAI or Claude key turns the screenplay into structured scenes, characters, locations and props. Claude, OpenAI, DeepSeek or Gemini then write the sections you pick, and a fal.ai key, if you add one, generates portraits, locations, props, storyboards and posters. Regenerate any part you don't like, then print, save or share the deck.
+Your OpenAI or Claude key turns the screenplay into structured scenes, characters, locations and props. Claude, OpenAI, DeepSeek or Gemini then write the sections you pick, and a fal.ai key, if you add one, generates portraits, locations, props, storyboards and posters. Regenerate any part you don't like, then open the print view to print the deck or save it as a PDF.
 
 ## Privacy
 

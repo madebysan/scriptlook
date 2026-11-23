@@ -57,12 +57,12 @@ export const metadata: Metadata = {
     template: "%s — Scriptlook",
   },
   description:
-    "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, posters, and release plans.",
+    "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, and posters.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Scriptlook",
     description:
-      "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, posters, and release plans.",
+      "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, and posters.",
     type: "website",
     url: "/",
     siteName: "Scriptlook",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Scriptlook",
     description:
-      "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, posters, and release plans.",
+      "A workspace for filmmakers and creative teams turning scripts into decks, references, storyboards, and posters.",
   },
 };
 

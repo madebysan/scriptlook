@@ -17,7 +17,7 @@ export type TextProviderOption = {
 export type TextModelOption = {
   id: string;
   label: string;
-  tier: "economy" | "recommended" | "premium";
+  tier: "economy" | "recommended";
   description: string;
 };
 
@@ -28,7 +28,7 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     id: "anthropic",
     label: "Claude",
     company: "Anthropic",
-    model: "claude-haiku-5-5",
+    model: "claude-sonnet-5-5",
     models: [
       { id: "claude-haiku-5-5", label: "Claude Haiku 5.5", tier: "economy", description: "Fastest, lowest-cost deck pass." },
       { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5", tier: "recommended", description: "Stronger writing and creative judgment." },
@@ -46,7 +46,6 @@ export const TEXT_PROVIDER_OPTIONS: readonly TextProviderOption[] = [
     models: [
       { id: "gpt-6-luna", label: "GPT-6 Luna", tier: "economy", description: "Efficient for high-volume report generation." },
       { id: "gpt-6.1-terra", label: "GPT-6.1 Terra", tier: "recommended", description: "Best balance of quality and cost." },
-      { id: "gpt-6.2-sol", label: "GPT-6.2 Sol", tier: "premium", description: "Highest-quality OpenAI deck pass." },
     ],
     description: "Fast general-purpose report pass.",
     keyLabel: "OpenAI API key",

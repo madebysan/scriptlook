@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Settings, RotateCcw, FileText, Download, Share2, Images, Loader2 } from "lucide-react";
+import { Settings, RotateCcw, FileText, Download, Printer, Images, Loader2 } from "lucide-react";
 import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import { HeaderButton, MoreMenu } from "./header-menu";
@@ -896,11 +896,11 @@ export function WizardShell() {
               )}
               {hasActiveProject && (
                 <HeaderButton
-                  icon={<Share2 size={14} />}
-                  label="Share"
+                  icon={<Printer size={14} />}
+                  label="Print view"
                   audioCue="open"
                   onClick={() => router.push("/app/share")}
-                  title="Open share view"
+                  title="Open the print view"
                 />
               )}
               {hasActiveProject && (
@@ -924,7 +924,6 @@ export function WizardShell() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        variant="destructive"
                         onClick={handleStartOver}
                         className="min-w-28"
                       >

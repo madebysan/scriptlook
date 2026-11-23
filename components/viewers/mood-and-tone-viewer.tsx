@@ -441,6 +441,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
   const [resolved, setResolved] = useState<Record<string, ResolvedFilm>>({});
   const [loading, setLoading] = useState(true);
   const { tmdbKey } = useApiKeys();
+  const hasTmdbKey = tmdbKey.trim().length > 0;
 
   const queryKey = useMemo(
     () => films.map((f) => `${f.title}|${f.year || ""}`).join("\n"),
@@ -478,23 +479,31 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
     <div className="space-y-3">
       {films.map((f) => {
         const r = resolved[f.title];
+        // A frame only when there is a poster to put in it. While the lookup
+        // runs, hold the space only if a TMDB key is set; without one there
+        // will be no posters, and an empty frame reads as something broken.
+        const showFrame = loading ? hasTmdbKey : Boolean(r?.poster_url);
         return (
           <div
             key={`${f.title}-${f.year || ""}`}
-            className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50"
+            className={`grid gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50 ${
+              showFrame ? "grid-cols-[64px_minmax(0,1fr)]" : "grid-cols-1"
+            }`}
           >
-            <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
-              {loading ? (
-                <div className="absolute inset-0 animate-pulse bg-muted/40" />
-              ) : r?.poster_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={r.poster_url}
-                  alt={f.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : null}
-            </div>
+            {showFrame && (
+              <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
+                {loading ? (
+                  <div className="absolute inset-0 animate-pulse bg-muted/40" />
+                ) : r?.poster_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={r.poster_url}
+                    alt={f.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-semibold text-foreground leading-snug">
                 {f.title}
@@ -517,6 +526,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
   const [resolved, setResolved] = useState<Record<string, ResolvedFilm>>({});
   const [loading, setLoading] = useState(true);
   const { tmdbKey } = useApiKeys();
+  const hasTmdbKey = tmdbKey.trim().length > 0;
 
   const queryKey = useMemo(
     () => tracks.map((t) => `${t.title}|${t.year || ""}`).join("\n"),
@@ -554,23 +564,31 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
     <div className="space-y-3">
       {tracks.map((t) => {
         const r = resolved[t.title];
+        // A frame only when there is a poster to put in it. While the lookup
+        // runs, hold the space only if a TMDB key is set; without one there
+        // will be no posters, and an empty frame reads as something broken.
+        const showFrame = loading ? hasTmdbKey : Boolean(r?.poster_url);
         return (
           <div
             key={`${t.title}-${t.year || ""}`}
-            className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50"
+            className={`grid gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50 ${
+              showFrame ? "grid-cols-[64px_minmax(0,1fr)]" : "grid-cols-1"
+            }`}
           >
-            <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
-              {loading ? (
-                <div className="absolute inset-0 animate-pulse bg-muted/40" />
-              ) : r?.poster_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={r.poster_url}
-                  alt={t.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : null}
-            </div>
+            {showFrame && (
+              <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
+                {loading ? (
+                  <div className="absolute inset-0 animate-pulse bg-muted/40" />
+                ) : r?.poster_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={r.poster_url}
+                    alt={t.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-semibold text-foreground leading-snug">
                 {t.title}

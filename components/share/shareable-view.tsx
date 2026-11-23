@@ -1285,12 +1285,12 @@ function PosterCard({
 }) {
   return (
     <div className="flex gap-3 rounded-lg border border-border/60 bg-card/30 p-3 break-inside-avoid">
-      <div className="w-20 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0">
-        {posterUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
+      {posterUrl && (
+        <div className="w-20 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={posterUrl} alt={title} className="w-full h-full object-cover" />
-        )}
-      </div>
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <div className="text-[12px] font-semibold text-foreground leading-snug">
           {title}

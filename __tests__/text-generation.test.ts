@@ -23,7 +23,7 @@ describe("model catalogue", () => {
   });
 
   it("falls back to the provider default for a model that is no longer offered", () => {
-    expect(normalizeTextModel("anthropic", "claude-sonnet-4-5-20250929")).toBe("claude-haiku-5-5");
+    expect(normalizeTextModel("anthropic", "claude-sonnet-4-5-20250929")).toBe("claude-sonnet-5-5");
     expect(normalizeTextModel("openai", "gpt-5.6-terra")).toBe("gpt-6.1-terra");
     expect(normalizeTextModel("deepseek", "deepseek-v4-flash")).toBe("deepseek-flash");
     expect(normalizeTextModel("gemini", "gemini-3.5-flash")).toBe("gemini-4-hydrogen");
