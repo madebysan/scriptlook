@@ -138,6 +138,8 @@ type StepResultsProps = {
   jsonData?: string;
   onJsonDataChange?: (newJsonData: string) => void;
   onStartOver: () => void;
+  onRetryFailed: () => void;
+  onOpenSettings: () => void;
   onDocumentUpdate?: (slug: string, newContent: string) => void;
   storyboardImages: Record<number, SavedImage>;
   onStoryboardImagesChange: (images: Record<number, SavedImage>) => void;
@@ -161,6 +163,8 @@ export function StepResults({
   jsonData,
   onJsonDataChange,
   onStartOver,
+  onRetryFailed,
+  onOpenSettings,
   onDocumentUpdate,
   storyboardImages,
   onStoryboardImagesChange,
@@ -261,7 +265,9 @@ export function StepResults({
     return doc?.status === "done" ? doc.content : null;
   };
 
-  const failedDocs = documents.filter((d) => d.status === "error");
+  // Anything that did not finish: a failed section, or one a stopped run
+  // never reached.
+  const failedDocs = documents.filter((d) => d.status !== "done");
 
   const overviewContent = getDocContent("overview");
   const moodContent = getDocContent("mood-and-tone");
@@ -287,15 +293,35 @@ export function StepResults({
       {failedDocs.length > 0 && (
         <div className="border-2 border-destructive bg-[var(--paper-sheet)] p-4">
           <p className="text-sm font-medium text-destructive mb-2">
-            Some report sections failed:
+            {failedDocs.length === 1
+              ? "1 section did not finish:"
+              : `${failedDocs.length} sections did not finish:`}
           </p>
           <ul className="space-y-1">
             {failedDocs.map((doc) => (
               <li key={doc.slug} className="text-sm text-destructive/80">
-                {doc.name}: {doc.error}
+                {doc.name}: {doc.error || "Stopped before it was written."}
               </li>
             ))}
           </ul>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onRetryFailed}
+              className="inline-flex min-h-10 items-center justify-center border-2 border-foreground bg-foreground px-5 text-[13px] font-bold text-background transition-colors hover:bg-foreground/90"
+            >
+              {failedDocs.length === 1
+                ? "Retry the failed section"
+                : `Retry ${failedDocs.length} failed sections`}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="inline-flex min-h-10 items-center justify-center border border-transparent px-4 text-[13px] transition-colors hover:border-foreground"
+            >
+              Open Settings
+            </button>
+          </div>
         </div>
       )}
 

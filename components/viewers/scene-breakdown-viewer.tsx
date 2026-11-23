@@ -275,7 +275,7 @@ export function SceneBreakdownViewer({
   const [aiShots, setAiShots] = useState<Record<number, Shot[]>>({});
   const [shotLoading, setShotLoading] = useState<Record<number, boolean>>({});
   const cancelRef = useRef(false);
-  const { ensureKeys } = useApiKeys();
+  const { ensureKeys, settings } = useApiKeys();
 
   // Build a lookup from scene number → storyboard scene for fast per-card access.
   const storyboardByNumber = useMemo((): Record<number, StoryboardScene> => {
@@ -320,6 +320,7 @@ export function SceneBreakdownViewer({
           prompt: sb.prompt,
           camera: sb.camera,
           stylePrefix: getStylePrefix("storyboard"),
+          imageModel: settings.deckImageModel,
           apiKey: keys.falKey,
         }),
       });
@@ -369,6 +370,7 @@ export function SceneBreakdownViewer({
             prompt: sb.prompt,
             camera: sb.camera,
             stylePrefix: getStylePrefix("storyboard"),
+            imageModel: settings.deckImageModel,
             apiKey: keys.falKey,
           }),
         });
@@ -403,6 +405,7 @@ export function SceneBreakdownViewer({
           slugLine: sb.slugLine,
           apiProvider: keys.apiProvider,
           apiKey: keys.apiKey,
+          textModel: keys.textModel,
         }),
       });
       if (!res.ok) throw new Error("Failed");
@@ -431,6 +434,7 @@ export function SceneBreakdownViewer({
             : {},
           apiProvider: keys.apiProvider,
           apiKey: keys.apiKey,
+          textModel: keys.textModel,
         }),
       });
       if (!res.ok) throw new Error("Failed");

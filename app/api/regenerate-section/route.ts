@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     const sectionKey = typeof body.sectionKey === "string" ? body.sectionKey : "";
     const jsonData = typeof body.jsonData === "string" ? body.jsonData : "";
     const generationAccess = await resolveTextGenerationConfig(body);
-    const { apiKey, provider } = generationAccess;
+    const { apiKey, provider, model } = generationAccess;
 
     if (!sectionKey || !jsonData || !apiKey) {
       return NextResponse.json(
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const content = await generateDocument(prompt, jsonData, { apiKey, provider });
+    const content = await generateDocument(prompt, jsonData, { apiKey, provider, model });
     return NextResponse.json({ content: content.trim() });
   } catch (error) {
     console.error("Section regeneration error:", error);

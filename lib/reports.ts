@@ -36,6 +36,9 @@ export const API_KEY_STORAGE = "stp-api-key";
 export const API_PROVIDER_STORAGE = "stp-api-provider";
 export const FAL_KEY_STORAGE = "stp-fal-key";
 export const TMDB_KEY_STORAGE = "stp-tmdb-key";
+export const TEXT_KEYS_STORAGE = "scriptlook-text-keys";
+export const MODEL_CHOICES_STORAGE = "scriptlook-model-choices";
+export const IMAGE_MODELS_STORAGE = "scriptlook-image-models";
 
 export function loadProject(): SavedProject | null {
   if (typeof window === "undefined") return null;

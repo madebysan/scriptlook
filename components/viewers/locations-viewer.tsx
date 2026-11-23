@@ -81,7 +81,7 @@ export function LocationsViewer({
   const [generatingPriority, setGeneratingPriority] = useState(false);
   const [priorityProgress, setPriorityProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
-  const { ensureKeys } = useApiKeys();
+  const { ensureKeys, settings } = useApiKeys();
 
   const mergedLocationImages: Record<string, LocationImageState> = useMemo(() => {
     const merged: Record<string, LocationImageState> = {};
@@ -123,6 +123,7 @@ export function LocationsViewer({
           name: location.name,
           prompt: buildLocationImagePrompt(location, scenes),
           stylePrefix: getStylePrefix("location"),
+          imageModel: settings.deckImageModel,
           apiKey: falKey,
         }),
       });

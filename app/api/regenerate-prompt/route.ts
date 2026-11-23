@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const prompt = typeof body.prompt === "string" ? body.prompt : "";
     const slugLine = typeof body.slugLine === "string" ? body.slugLine : "";
     const generationAccess = await resolveTextGenerationConfig(body);
-    const { apiKey, provider } = generationAccess;
+    const { apiKey, provider, model } = generationAccess;
 
     if (!prompt || !apiKey) {
       return NextResponse.json(
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const input = `Scene: ${slugLine || "Unknown"}\n\nCurrent prompt:\n${prompt}\n\nWrite a different visual interpretation of this same scene.`;
-    const newPrompt = await generateDocument(SYSTEM_PROMPT, input, { apiKey, provider });
+    const newPrompt = await generateDocument(SYSTEM_PROMPT, input, { apiKey, provider, model });
 
     return NextResponse.json({ prompt: newPrompt.trim() });
   } catch (error) {

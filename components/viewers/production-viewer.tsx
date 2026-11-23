@@ -77,7 +77,7 @@ export function ProductionViewer({
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
-  const { ensureKeys } = useApiKeys();
+  const { ensureKeys, settings } = useApiKeys();
 
   const mergedPropImages: Record<string, PropImageState> = useMemo(() => {
     const merged: Record<string, PropImageState> = {};
@@ -103,6 +103,7 @@ export function ProductionViewer({
           name: prop.item,
           notes: prop.notes,
           stylePrefix: getStylePrefix("prop"),
+          imageModel: settings.deckImageModel,
           apiKey: falKey,
         }),
       });

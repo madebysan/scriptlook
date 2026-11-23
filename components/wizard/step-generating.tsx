@@ -24,6 +24,7 @@ async function generateOne(
   apiKey: string,
   textModel: string,
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>,
+  signal: AbortSignal,
 ): Promise<{ slug: string; content: string | null; error: string | null }> {
   setDocuments((prev) =>
     prev.map((d) =>
@@ -41,6 +42,7 @@ async function generateOne(
         apiKey,
         textModel,
       }),
+      signal,
     });
 
     if (!res.ok) {
@@ -49,6 +51,8 @@ async function generateOne(
     }
 
     const data = await res.json();
+    // Stopped while the reply was arriving: the run is over, leave the deck be.
+    if (signal.aborted) return { slug: doc.slug, content: null, error: "Cancelled" };
 
     setDocuments((prev) =>
       prev.map((d) =>
@@ -60,6 +64,7 @@ async function generateOne(
 
     return { slug: doc.slug, content: data.content, error: null };
   } catch (error) {
+    if (signal.aborted) return { slug: doc.slug, content: null, error: "Cancelled" };
     const errMsg = error instanceof Error ? error.message : "Unknown error";
 
     setDocuments((prev) =>
@@ -93,6 +98,9 @@ export function StepGenerating({
 }: StepGeneratingProps) {
   const hasStarted = useRef(false);
   const cancelRef = useRef(false);
+  // Stop cancels the requests still in flight, so a stopped run cannot come
+  // back later and write over the deck or over a retry.
+  const abortRef = useRef<AbortController | null>(null);
   const [sessionStart, setSessionStart] = useState(0);
   const [docTimes, setDocTimes] = useState<Record<string, { start?: number; end?: number }>>({});
   const [now, setNow] = useState(0);
@@ -134,13 +142,19 @@ export function StepGenerating({
     hasStarted.current = true;
     const startedAt = Date.now();
     setTimeout(() => setSessionStart(startedAt), 0);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     async function generateParallel() {
-      // Fire all five text documents concurrently. Image generation is a
+      // Fire the text documents concurrently. Image generation is a
       // separate, explicitly confirmed command after this batch completes.
+      // A retry arrives with some sections already written: keep those and
+      // run only the rest.
       const results = await Promise.all(
         documents.map((doc) =>
-          cancelRef.current
+          doc.status === "done"
+            ? Promise.resolve({ slug: doc.slug, content: doc.content, error: null })
+            : cancelRef.current
             ? Promise.resolve({
                 slug: doc.slug,
                 content: null,
@@ -153,17 +167,18 @@ export function StepGenerating({
                 apiKey,
                 textModel,
                 setDocuments,
+                controller.signal,
               ),
         ),
       );
+
+      // Stop has already closed this run and saved what was finished.
+      if (cancelRef.current) return;
 
       const finalDocs = documents.map((doc) => {
         const result = results.find((r) => r.slug === doc.slug);
         if (!result) {
           return { ...doc, status: "error" as const, error: "Generation failed" };
-        }
-        if (cancelRef.current && !result.content) {
-          return { ...doc, status: "pending" as const };
         }
         return {
           ...doc,
@@ -225,6 +240,7 @@ export function StepGenerating({
               <button
                 onClick={() => {
                   cancelRef.current = true;
+                  abortRef.current?.abort();
                   onStop?.();
                 }}
                 className="font-mono text-[10px] uppercase tracking-[0.14em] text-destructive hover:text-destructive/80 transition-colors ml-1"

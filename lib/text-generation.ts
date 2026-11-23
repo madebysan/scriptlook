@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import {
   DEFAULT_TEXT_PROVIDER,
   getTextProviderOption,
-  normalizeTextModel,
+  resolveRequestedTextModel,
   type TextProvider,
 } from "@/lib/ai-providers";
 import {
@@ -134,7 +134,7 @@ export async function resolveTextGenerationConfig(body: {
   return {
     apiKey: access.apiKey,
     provider: access.provider,
-    model: normalizeTextModel(access.provider, body.textModel),
+    model: resolveRequestedTextModel(access.provider, body.textModel),
   };
 }
 

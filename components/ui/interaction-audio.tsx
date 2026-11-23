@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { useEffect } from "react";
 import {
   playUiAudio,
-  readUiAudioEnabled,
-  setUiAudioEnabled,
   syncUiAudioEnabledFromStorage,
   type UiAudioCue,
 } from "@/lib/ui-audio";
@@ -27,15 +24,11 @@ const CUES = new Set<UiAudioCue>([
 const pointerPlayedAt = new WeakMap<HTMLElement, number>();
 let lastHoverAudioAt = -Infinity;
 
+// Plays the interface sounds for anything marked with a `data-ui-audio`
+// attribute. It renders nothing: the on/off control lives in Settings.
 export function InteractionAudio() {
-  const [enabled, setEnabled] = useState(true);
-
   useEffect(() => {
-    const syncTimeout = window.setTimeout(() => {
-      setEnabled(syncUiAudioEnabledFromStorage());
-    }, 0);
-
-    return () => window.clearTimeout(syncTimeout);
+    syncUiAudioEnabledFromStorage();
   }, []);
 
   useEffect(() => {
@@ -83,28 +76,7 @@ export function InteractionAudio() {
     };
   }, []);
 
-  const toggleAudio = () => {
-    const nextEnabled = !readUiAudioEnabled();
-    setUiAudioEnabled(nextEnabled);
-    setEnabled(nextEnabled);
-
-    if (nextEnabled) {
-      playUiAudio("success");
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggleAudio}
-      aria-pressed={enabled}
-      aria-label={enabled ? "Turn interface sounds off" : "Turn interface sounds on"}
-      title={enabled ? "Interface sounds on" : "Interface sounds off"}
-      className="no-print fixed bottom-3 right-3 z-[120] inline-flex h-9 w-9 items-center justify-center border border-foreground/40 bg-background/90 text-foreground shadow-[3px_3px_0_rgba(0,0,0,0.22)] backdrop-blur transition-colors hover:bg-[var(--paper-highlight)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-    >
-      {enabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-    </button>
-  );
+  return null;
 }
 
 function resolveCue(value: string | null): UiAudioCue {

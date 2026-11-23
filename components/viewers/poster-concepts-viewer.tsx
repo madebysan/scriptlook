@@ -127,7 +127,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
-  const { ensureKeys } = useApiKeys();
+  const { ensureKeys, settings } = useApiKeys();
 
   // Merge saved + local images
   const posterImages: Record<number, PosterImageState> = useMemo(() => {
@@ -182,6 +182,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
           slugLine: concept.name,
           apiProvider: keys.apiProvider,
           apiKey: keys.apiKey,
+          textModel: keys.textModel,
         }),
       });
       if (!res.ok) throw new Error("Failed");
@@ -223,6 +224,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         body: JSON.stringify({
           prompt,
           stylePrefix: getStylePrefix("poster"),
+          imageModel: settings.posterImageModel,
           apiKey: falKey,
         }),
       });

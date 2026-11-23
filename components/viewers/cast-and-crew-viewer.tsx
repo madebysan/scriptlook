@@ -311,7 +311,7 @@ export function CastAndCrewViewer({
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
-  const { ensureKeys } = useApiKeys();
+  const { ensureKeys, settings } = useApiKeys();
 
   const insights = useMemo(() => computeInsights(data), [data]);
   const principalCharacters = [...characters]
@@ -353,6 +353,7 @@ export function CastAndCrewViewer({
           name: char.name,
           description: char.description,
           stylePrefix: getStylePrefix("portrait"),
+          imageModel: settings.deckImageModel,
           apiKey: falKey,
         }),
       });

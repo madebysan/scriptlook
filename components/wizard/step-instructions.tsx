@@ -5,6 +5,7 @@ import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
 import { validateScreenplayJson } from "@/lib/schema";
 import { Check, Copy, ChevronDown, Loader2, Upload } from "lucide-react";
 import { useApiKeys } from "@/lib/api-keys-context";
+import { isExtractionProvider } from "@/lib/ai-providers";
 import { extractPdfText } from "@/lib/pdf-text";
 import { fdxToPlainText } from "@/lib/fdx-text";
 import {
@@ -187,16 +188,17 @@ export function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => 
     setError("");
     setWarning("");
 
-    // Prompt for the selected provider key before sending screenplay text.
-    // OpenAI uses the low-cost extraction lane; Claude remains supported.
+    // Ask for a yes before any screenplay text is sent. The confirmation
+    // resolves with the provider that will read it (Claude or OpenAI) and asks
+    // for that provider's key first if none is saved.
     const keys = await ensureKeys({ alwaysConfirm: true });
     if (!keys) {
       setStatus("idle");
       setFileName("");
       return;
     }
-    if (keys.apiProvider !== "anthropic" && keys.apiProvider !== "openai") {
-      setError("PDF extraction currently supports OpenAI or Claude. Select one and try again.");
+    if (!isExtractionProvider(keys.apiProvider) || !keys.apiKey) {
+      setError("Reading a screenplay needs a Claude or OpenAI key. Add one in Settings and try again.");
       setStatus("error");
       return;
     }

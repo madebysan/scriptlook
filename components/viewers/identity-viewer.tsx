@@ -75,6 +75,7 @@ export function IdentityViewer({
           jsonData,
           apiProvider: keys.apiProvider,
           apiKey: keys.apiKey,
+          textModel: keys.textModel,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

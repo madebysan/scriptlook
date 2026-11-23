@@ -8,13 +8,6 @@ import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import { HeaderButton, MoreMenu } from "./header-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -28,7 +21,7 @@ import {
 import { StepInstructions } from "./step-instructions";
 import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
-import { TextProviderFields } from "./text-provider-fields";
+import { SettingsDialog } from "./settings-dialog";
 import {
   ImageConfirmationDialog,
   TextConfirmationDialog,
@@ -43,23 +36,9 @@ import {
   extractTitle,
 } from "@/lib/reports";
 import { useApiKeys } from "@/lib/api-keys-context";
-import {
-  getTextProviderOption,
-  normalizeTextModel,
-  type TextProvider,
-} from "@/lib/ai-providers";
-import {
-  DEFAULT_DECK_IMAGE_MODEL,
-  DEFAULT_POSTER_IMAGE_MODEL,
-  type ImageModel,
-} from "@/lib/image-models";
-import {
-  type ImagePromptKind,
-  DEFAULT_IMAGE_PROMPTS,
-  loadImagePrompts,
-  saveImagePrompts,
-  getStylePrefix,
-} from "@/lib/image-prompts";
+import type { TextProvider } from "@/lib/ai-providers";
+import type { ImageModel } from "@/lib/image-models";
+import { getStylePrefix } from "@/lib/image-prompts";
 import {
   buildLocationImagePrompt,
   getLocationImageKey,
@@ -96,16 +75,7 @@ function buildPendingDocuments(deliverables: readonly DeliverableId[]): Document
 
 export function WizardShell() {
   const router = useRouter();
-  const {
-    apiProvider,
-    apiKey,
-    falKey,
-    tmdbKey,
-    setApiProvider,
-    setApiKey,
-    setFalKey,
-    setTmdbKey,
-  } = useApiKeys();
+  const { settings, apiProvider, textModel, falKey } = useApiKeys();
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [jsonData, setJsonData] = useState<string>("");
@@ -115,19 +85,19 @@ export function WizardShell() {
   const [pendingJson, setPendingJson] = useState<string | null>(null);
   const [showDeliverables, setShowDeliverables] = useState(false);
   const [showTextConfirmation, setShowTextConfirmation] = useState(false);
-  const [textModel, setTextModel] = useState(getTextProviderOption(apiProvider).model);
-  const [confirmedTextModel, setConfirmedTextModel] = useState(getTextProviderOption(apiProvider).model);
+  // True while the "Write the deck?" confirmation is for a retry of failed
+  // sections rather than a first run.
+  const [retryingFailed, setRetryingFailed] = useState(false);
+  // The provider, key and model a writing run was confirmed with. Fixed at
+  // confirmation so a change in Settings mid-run cannot split one deck across
+  // two models.
+  const [runConfig, setRunConfig] = useState<{
+    provider: TextProvider;
+    apiKey: string;
+    model: string;
+  } | null>(null);
   const [showImageConfirmation, setShowImageConfirmation] = useState(false);
-  const [deckImageModel, setDeckImageModel] = useState<ImageModel>(DEFAULT_DECK_IMAGE_MODEL);
-  const [posterImageModel, setPosterImageModel] = useState<ImageModel>(DEFAULT_POSTER_IMAGE_MODEL);
   const [imageConfirmationCounts, setImageConfirmationCounts] = useState({ deck: 0, posters: 0 });
-  const [imagePrompts, setImagePrompts] = useState<Record<ImagePromptKind, string>>({
-    storyboard: DEFAULT_IMAGE_PROMPTS.storyboard,
-    portrait: DEFAULT_IMAGE_PROMPTS.portrait,
-    prop: DEFAULT_IMAGE_PROMPTS.prop,
-    location: DEFAULT_IMAGE_PROMPTS.location,
-    poster: DEFAULT_IMAGE_PROMPTS.poster,
-  });
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
@@ -135,7 +105,6 @@ export function WizardShell() {
   const [propImages, setPropImages] = useState<Record<string, SavedImage>>({});
   const [locationImages, setLocationImages] = useState<Record<string, SavedImage>>({});
   const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>({});
-  const hasImageGenerationKey = Boolean(falKey.trim());
   const projectSnapshotRef = useRef<SavedProject | null>(null);
   const portraitsRef = useRef<Record<string, SavedImage>>(portraits);
   const propImagesRef = useRef<Record<string, SavedImage>>(propImages);
@@ -187,46 +156,12 @@ export function WizardShell() {
       setCurrentStep(3);
     }
     document.documentElement.classList.add("dark");
-    // Merge stored overrides into defaults so blank fields fall back cleanly.
-    const stored = loadImagePrompts();
-    setImagePrompts({
-      storyboard: stored.storyboard ?? DEFAULT_IMAGE_PROMPTS.storyboard,
-      portrait: stored.portrait ?? DEFAULT_IMAGE_PROMPTS.portrait,
-      prop: stored.prop ?? DEFAULT_IMAGE_PROMPTS.prop,
-      location: stored.location ?? DEFAULT_IMAGE_PROMPTS.location,
-      poster: stored.poster ?? DEFAULT_IMAGE_PROMPTS.poster,
-    });
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
-  const handleImagePromptChange = (kind: ImagePromptKind, value: string) => {
-    const next = { ...imagePrompts, [kind]: value };
-    setImagePrompts(next);
-    // Persist only entries that differ from defaults so a blank reset restores defaults.
-    const overrides: Partial<Record<ImagePromptKind, string>> = {};
-    for (const k of Object.keys(next) as ImagePromptKind[]) {
-      if (next[k].trim() && next[k].trim() !== DEFAULT_IMAGE_PROMPTS[k]) {
-        overrides[k] = next[k];
-      }
-    }
-    saveImagePrompts(overrides);
-  };
-
-  const handleTextProviderChange = (provider: TextProvider) => {
-    if (provider === apiProvider) return;
-    setApiProvider(provider);
-    setApiKey("");
-    setTextModel(getTextProviderOption(provider).model);
-  };
-
-  const handleResetImagePrompt = (kind: ImagePromptKind) => {
-    handleImagePromptChange(kind, DEFAULT_IMAGE_PROMPTS[kind]);
-  };
-
   const handleJsonSubmit = (json: string) => {
     setPendingJson(normalizeScreenplayData(json));
-    setTextModel((currentModel) => normalizeTextModel(apiProvider, currentModel));
     setDeliverables([...DEFAULT_DELIVERABLES]);
     setShowDeliverables(true);
   };
@@ -270,14 +205,34 @@ export function WizardShell() {
     });
   };
 
-  const handleConfirmTextGeneration = () => {
+  const handleConfirmTextGeneration = (confirmedKey: string) => {
+    const config = { provider: apiProvider, apiKey: confirmedKey, model: textModel };
+
+    if (retryingFailed) {
+      // Run again only what did not finish; finished sections are kept.
+      setRunConfig(config);
+      setDocuments((current) =>
+        current.map((doc) =>
+          doc.status === "done" ? doc : { ...doc, status: "pending", content: null, error: null },
+        ),
+      );
+      setRetryingFailed(false);
+      setShowTextConfirmation(false);
+      setCurrentStep(2);
+      return;
+    }
+
     if (!pendingJson) return;
-    const selectedModel = normalizeTextModel(apiProvider, textModel);
-    setConfirmedTextModel(selectedModel);
+    setRunConfig(config);
     setJsonData(pendingJson);
     setPendingJson(null);
     setShowTextConfirmation(false);
     setCurrentStep(2);
+  };
+
+  const handleRetryFailed = () => {
+    setRetryingFailed(true);
+    setShowTextConfirmation(true);
   };
 
   const handleGenerationComplete = useCallback(
@@ -430,8 +385,8 @@ export function WizardShell() {
   // effect so hydration syncs land before we start reading refs.
   const falKeyRef = useRef<string>(falKey);
   const promptOverridesRef = useRef<Record<number, string>>(promptOverrides);
-  const deckImageModelRef = useRef<ImageModel>(deckImageModel);
-  const posterImageModelRef = useRef<ImageModel>(posterImageModel);
+  const deckImageModelRef = useRef<ImageModel>(settings.deckImageModel);
+  const posterImageModelRef = useRef<ImageModel>(settings.posterImageModel);
   const pendingImageTasksRef = useRef<ImageTask[]>([]);
 
   useEffect(() => { portraitsRef.current = portraits; }, [portraits]);
@@ -441,8 +396,8 @@ export function WizardShell() {
   useEffect(() => { posterImagesRef.current = posterImages; }, [posterImages]);
   useEffect(() => { falKeyRef.current = falKey; }, [falKey]);
   useEffect(() => { promptOverridesRef.current = promptOverrides; }, [promptOverrides]);
-  useEffect(() => { deckImageModelRef.current = deckImageModel; }, [deckImageModel]);
-  useEffect(() => { posterImageModelRef.current = posterImageModel; }, [posterImageModel]);
+  useEffect(() => { deckImageModelRef.current = settings.deckImageModel; }, [settings.deckImageModel]);
+  useEffect(() => { posterImageModelRef.current = settings.posterImageModel; }, [settings.posterImageModel]);
 
   const buildPortraitTasks = (
     json: string,
@@ -805,10 +760,10 @@ export function WizardShell() {
     setShowImageConfirmation(true);
   };
 
-  const handleConfirmImageGeneration = () => {
-    falKeyRef.current = falKey;
-    deckImageModelRef.current = deckImageModel;
-    posterImageModelRef.current = posterImageModel;
+  const handleConfirmImageGeneration = (confirmedFalKey: string) => {
+    falKeyRef.current = confirmedFalKey;
+    deckImageModelRef.current = settings.deckImageModel;
+    posterImageModelRef.current = settings.posterImageModel;
     setShowImageConfirmation(false);
     enqueueImageTasks(pendingImageTasksRef.current);
     pendingImageTasksRef.current = [];
@@ -840,13 +795,6 @@ export function WizardShell() {
 
   const hasActiveProject = currentStep === 3;
   const hasSelectedImageDeliverables = hasImageDeliverables(deliverables);
-  const settingsInputClass =
-    "w-full px-3 py-2.5 font-mono text-[13px] placeholder:text-muted-foreground/50 focus:outline-none border border-border bg-background/60 text-foreground [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20";
-  const settingsTextareaClass =
-    "w-full resize-y px-3 py-2.5 font-mono text-[12px] leading-[1.55] text-foreground/90 placeholder:text-muted-foreground/50 focus:outline-none border border-border bg-background/60 [border-radius:0!important] focus:border-foreground focus:ring-2 focus:ring-foreground/20";
-  const settingsSectionLabelClass =
-    "font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-foreground";
-
   return (
     <div className="paper min-h-screen bg-background">
       <header className="relative z-50 border-b-2 border-foreground bg-background text-foreground">
@@ -1029,17 +977,25 @@ export function WizardShell() {
             }}
           />
         )}
-        {currentStep === 2 && (
+        {currentStep === 2 && runConfig && (
           <div className="form-sheet p-6 sm:p-9">
             <StepGenerating
-              apiProvider={apiProvider}
-              apiKey={apiKey}
-              textModel={confirmedTextModel}
+              apiProvider={runConfig.provider}
+              apiKey={runConfig.apiKey}
+              textModel={runConfig.model}
               jsonData={jsonData}
               documents={documents}
               setDocuments={setDocuments}
               onComplete={handleGenerationComplete}
-              onStop={() => handleGenerationComplete(documents)}
+              onStop={() =>
+                // Stop cancels the requests in flight; those sections go back
+                // to waiting so the deck offers to retry them.
+                handleGenerationComplete(
+                  documents.map((doc) =>
+                    doc.status === "generating" ? { ...doc, status: "pending" } : doc,
+                  ),
+                )
+              }
             />
           </div>
         )}
@@ -1050,6 +1006,8 @@ export function WizardShell() {
             jsonData={jsonData}
             onJsonDataChange={handleJsonDataChange}
             onStartOver={handleStartOver}
+            onRetryFailed={handleRetryFailed}
+            onOpenSettings={() => setShowSettings(true)}
             onDocumentUpdate={handleDocumentUpdate}
             storyboardImages={storyboardImages}
             onStoryboardImagesChange={handleImagesChange}
@@ -1080,191 +1038,32 @@ export function WizardShell() {
         onConfirm={handleConfirmDeliverables}
       />
 
-      <TextConfirmationDialog
-        open={showTextConfirmation}
-        provider={apiProvider}
-        apiKey={apiKey}
-        model={normalizeTextModel(apiProvider, textModel)}
-        onProviderChange={handleTextProviderChange}
-        onApiKeyChange={setApiKey}
-        onModelChange={setTextModel}
-        onCancel={() => {
-          setShowTextConfirmation(false);
-          setShowDeliverables(true);
-        }}
-        onConfirm={handleConfirmTextGeneration}
-      />
+      {showTextConfirmation && (
+        <TextConfirmationDialog
+          open
+          onCancel={() => {
+            setShowTextConfirmation(false);
+            if (retryingFailed) setRetryingFailed(false);
+            else setShowDeliverables(true);
+          }}
+          onConfirm={handleConfirmTextGeneration}
+        />
+      )}
 
-      <ImageConfirmationDialog
-        open={showImageConfirmation}
-        falKey={falKey}
-        deckModel={deckImageModel}
-        posterModel={posterImageModel}
-        deckCount={imageConfirmationCounts.deck}
-        posterCount={imageConfirmationCounts.posters}
-        onFalKeyChange={setFalKey}
-        onDeckModelChange={setDeckImageModel}
-        onPosterModelChange={setPosterImageModel}
-        onCancel={() => {
-          setShowImageConfirmation(false);
-          pendingImageTasksRef.current = [];
-        }}
-        onConfirm={handleConfirmImageGeneration}
-      />
+      {showImageConfirmation && (
+        <ImageConfirmationDialog
+          open
+          deckCount={imageConfirmationCounts.deck}
+          posterCount={imageConfirmationCounts.posters}
+          onCancel={() => {
+            setShowImageConfirmation(false);
+            pendingImageTasksRef.current = [];
+          }}
+          onConfirm={handleConfirmImageGeneration}
+        />
+      )}
 
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent
-          className="paper max-h-[85vh] overflow-y-auto border-2 border-foreground bg-[var(--paper-sheet)] text-foreground shadow-[8px_8px_0_rgba(17,17,17,0.18)] [border-radius:0!important] sm:max-w-2xl"
-        >
-          <DialogHeader>
-            <DialogTitle className="form-sec-head text-[22px] text-foreground">
-              Settings
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Choose the active text provider, API keys, and image style settings.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* API keys section */}
-          <section className="space-y-5 pt-2">
-            <div className={settingsSectionLabelClass}>
-              API Keys
-            </div>
-            <TextProviderFields
-              provider={apiProvider}
-              apiKey={apiKey}
-              model={normalizeTextModel(apiProvider, textModel)}
-              onProviderChange={handleTextProviderChange}
-              onApiKeyChange={setApiKey}
-              onModelChange={setTextModel}
-              surface="paper"
-            />
-            <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-normal">
-                fal.ai API key{" "}
-                <span className="text-muted-foreground font-normal">· optional</span>
-              </label>
-              <p className="text-[12px] text-foreground/60 tracking-normal">
-                Generates images. Leave blank for text only.{" "}
-                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
-                  Get a key
-                </a>
-              </p>
-              <input
-                type="password"
-                placeholder="fal-..."
-                value={falKey}
-                onChange={(e) => setFalKey(e.target.value)}
-                className={settingsInputClass}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-normal">
-                TMDB API key{" "}
-                <span className="text-muted-foreground font-normal">· optional</span>
-              </label>
-              <p className="text-[12px] text-foreground/60 tracking-normal">
-                Adds poster thumbnails. Optional.{" "}
-                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
-                  Get a key
-                </a>
-              </p>
-              <input
-                type="password"
-                placeholder="TMDB API key (v3 auth)"
-                value={tmdbKey}
-                onChange={(e) => setTmdbKey(e.target.value)}
-                className={settingsInputClass}
-              />
-            </div>
-            <p className="text-[11px] text-foreground/50 tracking-normal">
-              Keys stay in this browser and are only sent when you generate.
-            </p>
-          </section>
-
-          {/* Image style prompts */}
-          <section className="space-y-4 pt-6">
-            <div className={settingsSectionLabelClass}>
-              Image Styles
-            </div>
-            {hasImageGenerationKey ? (
-              <>
-                <p className="text-[12px] text-foreground/60 tracking-normal leading-[1.55]">
-                  Choose the look for new generated images. Provider-specific model
-                  tags are added by Scriptlook.
-                </p>
-
-                {(["storyboard", "portrait", "prop", "location", "poster"] as ImagePromptKind[]).map(
-                  (kind) => {
-                    const labels: Record<ImagePromptKind, { title: string; sub: string }> = {
-                      storyboard: {
-                        title: "Storyboard frames",
-                        sub: "Scene-by-scene shot illustrations, 16:9.",
-                      },
-                      portrait: {
-                        title: "Character portraits",
-                        sub: "Head-and-shoulders cast references, square.",
-                      },
-                      prop: {
-                        title: "Prop references",
-                        sub: "Isolated art-department sketches, square.",
-                      },
-                      location: {
-                        title: "Location references",
-                        sub: "Priority scout plates, 16:9.",
-                      },
-                      poster: {
-                        title: "Poster concepts",
-                        sub: "Tall poster compositions from Posters, 5:7.",
-                      },
-                    };
-                    const isModified =
-                      imagePrompts[kind].trim() !== DEFAULT_IMAGE_PROMPTS[kind];
-                    return (
-                      <div key={kind} className="space-y-2">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <div className="min-w-0">
-                            <label className="text-[13px] font-medium tracking-normal">
-                              {labels[kind].title}
-                            </label>
-                            <p className="text-[11px] text-foreground/55 tracking-normal mt-0.5">
-                              {labels[kind].sub}
-                            </p>
-                          </div>
-                          {isModified && (
-                            <button
-                              onClick={() => handleResetImagePrompt(kind)}
-                              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-                              title="Restore the default style prefix"
-                            >
-                              Reset
-                            </button>
-                          )}
-                        </div>
-                        <textarea
-                          value={imagePrompts[kind]}
-                          onChange={(e) => handleImagePromptChange(kind, e.target.value)}
-                          rows={4}
-                          className={settingsTextareaClass}
-                          placeholder={DEFAULT_IMAGE_PROMPTS[kind]}
-                        />
-                      </div>
-                    );
-                  },
-                )}
-
-                <p className="text-[11px] text-foreground/50 tracking-normal">
-                  Only new images use these settings. Existing images stay as they are.
-                </p>
-              </>
-            ) : (
-              <p className="border border-foreground/20 bg-foreground/[0.03] px-3 py-2.5 text-[12px] text-foreground/60 tracking-normal leading-[1.55]">
-                Add a fal.ai key above to edit image style prompts.
-              </p>
-            )}
-          </section>
-        </DialogContent>
-      </Dialog>
+      {showSettings && <SettingsDialog onClose={() => setShowSettings(false)} />}
     </div>
   );
 }

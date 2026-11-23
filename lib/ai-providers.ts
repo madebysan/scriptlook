@@ -120,3 +120,45 @@ export function normalizeTextModel(provider: TextProvider, value: unknown): stri
   if (typeof value !== "string") return option.model;
   return option.models.some((model) => model.id === value) ? value : option.model;
 }
+
+// A model ID someone typed in because it is newer than this list. Only its
+// shape is checked: the provider decides whether it exists.
+const MODEL_ID_SHAPE = /^[A-Za-z0-9][A-Za-z0-9._:/-]{1,99}$/;
+
+export function isPlausibleModelId(value: unknown): value is string {
+  return typeof value === "string" && MODEL_ID_SHAPE.test(value.trim());
+}
+
+// What a person picked for one provider: a listed model, or a typed ID that
+// takes over while `useCustom` is on.
+export type TextModelChoice = {
+  model: string;
+  customModel: string;
+  useCustom: boolean;
+};
+
+export function defaultTextModelChoice(provider: TextProvider): TextModelChoice {
+  return { model: getTextProviderOption(provider).model, customModel: "", useCustom: false };
+}
+
+// The model ID to send for a provider, given what was picked. A listed model
+// that has since left the list falls back to the provider default.
+export function resolveTextModelChoice(provider: TextProvider, choice: TextModelChoice): string {
+  if (choice.useCustom && isPlausibleModelId(choice.customModel)) {
+    return choice.customModel.trim();
+  }
+  return normalizeTextModel(provider, choice.model);
+}
+
+// Server side: accept a listed model or a plausible typed ID from the request.
+export function resolveRequestedTextModel(provider: TextProvider, value: unknown): string {
+  const option = getTextProviderOption(provider);
+  if (typeof value !== "string") return option.model;
+  if (option.models.some((model) => model.id === value)) return value;
+  return isPlausibleModelId(value) ? value.trim() : option.model;
+}
+
+export function getTextModelLabel(provider: TextProvider, modelId: string): string {
+  const listed = getTextProviderOption(provider).models.find((model) => model.id === modelId);
+  return listed ? listed.label : modelId;
+}
