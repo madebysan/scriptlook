@@ -4,6 +4,7 @@
 
 - Security updates: Next.js 16.4 fixes a critical advisory, and PDF.js 6.4 fixes a malicious-PDF advisory.
 - More security updates: Next.js 16.4.6 fixes a newer critical advisory, along with patched Undici, Vite and Zod.
+- Removed the shadcn developer package, which the app used for one small stylesheet now kept in the repo. This clears the last five security advisories; the audit reports none.
 - Updated to current models: Claude Haiku 5.5 and Sonnet 5.5 (Sonnet 4.5 retires on November 30, 2026), GPT-6 Luna and GPT-6.1 Terra, DeepSeek Flash, and Gemini 4 Hydrogen with Gemini 3.5 Flash-Lite. Claude now starts on Sonnet 5.5.
 - Settings is now two short tabs, Writing and Images, instead of one long scroll. Image styles sit behind one line, and the sound switch moved here from the corner of every page.
 - The app remembers one key per provider, so switching between Claude and OpenAI no longer wipes the key.
